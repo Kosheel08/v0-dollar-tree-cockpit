@@ -5,6 +5,9 @@ import Sidebar from "@/components/cockpit/Sidebar"
 import DemandPlanningPage from "@/components/cockpit/DemandPlanningPage"
 import InventoryAllocationPage from "@/components/cockpit/InventoryAllocationPage"
 import SupplierInboundPage from "@/components/cockpit/SupplierInboundPage"
+import DCCapacityTransportPage from "@/components/cockpit/DCCapacityTransportPage"
+
+const WIRED = ["demand", "inventory", "supplier-inbound", "dc-capacity"]
 
 export default function CockpitShell() {
   const [activeTab, setActiveTab] = useState<string>("demand")
@@ -16,7 +19,8 @@ export default function CockpitShell() {
         {activeTab === "demand" && <DemandPlanningPage />}
         {activeTab === "inventory" && <InventoryAllocationPage />}
         {activeTab === "supplier-inbound" && <SupplierInboundPage />}
-        {!["demand", "inventory", "supplier-inbound"].includes(activeTab) && (
+        {activeTab === "dc-capacity" && <DCCapacityTransportPage />}
+        {!WIRED.includes(activeTab) && (
           <div className="flex items-center justify-center h-full min-h-screen">
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">Coming soon</p>
