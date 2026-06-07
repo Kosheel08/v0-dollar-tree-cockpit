@@ -1,16 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Sidebar from "@/components/cockpit/Sidebar"
 import DemandPlanningPage from "@/components/cockpit/DemandPlanningPage"
 import InventoryAllocationPage from "@/components/cockpit/InventoryAllocationPage"
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState("demand")
+  const [activeTab, setActiveTab] = useState<string>("demand")
+  const handleTabChange = useCallback((tab: string) => setActiveTab(tab), [])
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
       <div className="flex-1 overflow-y-auto">
         {activeTab === "demand"    && <DemandPlanningPage />}
         {activeTab === "inventory" && <InventoryAllocationPage />}
