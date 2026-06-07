@@ -7,16 +7,18 @@ import InventoryAllocationPage from "@/components/cockpit/InventoryAllocationPag
 import SupplierInboundPage from "@/components/cockpit/SupplierInboundPage"
 import DCCapacityTransportPage from "@/components/cockpit/DCCapacityTransportPage"
 import StoreExecutionPage from "@/components/cockpit/StoreExecutionPage"
+import ExecControlTowerPage from "@/components/cockpit/ExecControlTowerPage"
 
-const WIRED = ["demand", "inventory", "supplier-inbound", "dc-capacity", "store-execution"]
+const WIRED = ["executive-tower", "demand", "inventory", "supplier-inbound", "dc-capacity", "store-execution"]
 
 export default function CockpitShell() {
-  const [activeTab, setActiveTab] = useState<string>("demand")
+  const [activeTab, setActiveTab] = useState<string>("executive-tower")
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="flex-1 overflow-y-auto">
+        {activeTab === "executive-tower" && <ExecControlTowerPage onGoToTab={setActiveTab} />}
         {activeTab === "demand" && <DemandPlanningPage />}
         {activeTab === "inventory" && <InventoryAllocationPage />}
         {activeTab === "supplier-inbound" && <SupplierInboundPage />}

@@ -2,25 +2,22 @@
 
 import {
   Boxes,
-  AlertTriangle,
   LayoutDashboard,
   TreePine,
-  FileText,
   Truck,
   Warehouse,
   Store,
-  Zap,
+  Radio,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
+  { label: "Executive Control Tower", icon: Radio, id: "executive-tower" },
   { label: "Demand Planning", icon: LayoutDashboard, id: "demand" },
   { label: "Inventory & Allocation", icon: Boxes, id: "inventory" },
   { label: "Supplier & Inbound Flow", icon: Truck, id: "supplier-inbound" },
   { label: "DC Capacity & Transportation", icon: Warehouse, id: "dc-capacity" },
   { label: "Store Execution", icon: Store, id: "store-execution" },
-  { label: "Exception Command Center", icon: Zap, id: "exceptions" },
-  { label: "Executive Summary", icon: FileText, id: "executive" },
 ]
 
 interface SidebarProps {
