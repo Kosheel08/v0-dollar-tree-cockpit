@@ -1,27 +1,25 @@
 "use client"
 
 import {
-  BarChart3,
-  GitMerge,
   Boxes,
-  TrendingUp,
   AlertTriangle,
-  ClipboardList,
   LayoutDashboard,
   TreePine,
-  Radio,
   FileText,
+  Truck,
+  Warehouse,
+  Store,
+  Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
   { label: "Demand Planning", icon: LayoutDashboard, id: "demand" },
   { label: "Inventory & Allocation", icon: Boxes, id: "inventory" },
-  { label: "Forecast Accuracy", icon: TrendingUp, id: "forecast" },
-  { label: "Demand Transfer", icon: GitMerge, id: "transfer" },
-  { label: "Inventory Risk", icon: BarChart3, id: "inv-risk" },
-  { label: "Supplier Signals", icon: Radio, id: "supplier" },
-  { label: "Exception Review", icon: AlertTriangle, id: "exceptions" },
+  { label: "Supplier & Inbound Flow", icon: Truck, id: "supplier-inbound" },
+  { label: "DC Capacity & Transportation", icon: Warehouse, id: "dc-capacity" },
+  { label: "Store Execution", icon: Store, id: "store-execution" },
+  { label: "Exception Command Center", icon: Zap, id: "exceptions" },
   { label: "Executive Summary", icon: FileText, id: "executive" },
 ]
 

@@ -4,6 +4,7 @@ import { useState } from "react"
 import Sidebar from "@/components/cockpit/Sidebar"
 import DemandPlanningPage from "@/components/cockpit/DemandPlanningPage"
 import InventoryAllocationPage from "@/components/cockpit/InventoryAllocationPage"
+import SupplierInboundPage from "@/components/cockpit/SupplierInboundPage"
 
 export default function CockpitShell() {
   const [activeTab, setActiveTab] = useState<string>("demand")
@@ -14,7 +15,8 @@ export default function CockpitShell() {
       <div className="flex-1 overflow-y-auto">
         {activeTab === "demand" && <DemandPlanningPage />}
         {activeTab === "inventory" && <InventoryAllocationPage />}
-        {!["demand", "inventory"].includes(activeTab) && (
+        {activeTab === "supplier-inbound" && <SupplierInboundPage />}
+        {!["demand", "inventory", "supplier-inbound"].includes(activeTab) && (
           <div className="flex items-center justify-center h-full min-h-screen">
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">Coming soon</p>
