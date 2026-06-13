@@ -3,8 +3,8 @@
 import { useRef, useState } from "react"
 import {
   RefreshCw, Download, Search, ArrowRight, ChevronRight,
-  Zap, Link2, CheckCircle2, Clock, AlertTriangle,
-  DollarSign, Users, BookOpen, BarChart3, Boxes, Truck, Store,
+  Zap, CheckCircle2, Clock, AlertTriangle,
+  DollarSign, Users,
 } from "lucide-react"
 import ECTDetailDrawer from "./ECTDetailDrawer"
 import StatusBadge from "./ECTStatusBadge"
@@ -755,63 +755,57 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
   const FLOW_STAGES = [
     {
       id: "sku-segmentation",
-      title: "AI-Driven SKU Segmentation",
+      title: "SKU Segmentation",
       status: "stable" as StatusLevel,
       uses: "SKU behavior, merchant intent, history depth, store absorption, constraints",
-      detects: "Best-fit SKU segment and strategy",
+      detects: "Assign fit-for-purpose strategy",
       output: "Fit-for-purpose planning logic",
       metric: "2,180 SKU families analyzed",
-      icon: <Boxes className="w-4 h-4" />,
     },
     {
       id: "demand",
       title: "Demand Planning",
       status: "critical" as StatusLevel,
       uses: "Forecasts, sales velocity, promo timing",
-      detects: "Under-forecast bias",
+      detects: "Detect forecast risk",
       output: "Forecast uplift recommendation",
       metric: "-4.8% forecast bias",
-      icon: <BarChart3 className="w-4 h-4" />,
     },
     {
       id: "inventory",
-      title: "Inventory & Allocation",
+      title: "Inventory",
       status: "critical" as StatusLevel,
       uses: "Available inventory, WOS, store exposure",
-      detects: "Allocation shortfall and overstock pools",
+      detects: "Prioritize allocation need",
       output: "Protected allocation recommendation",
       metric: "214 stores exposed",
-      icon: <BookOpen className="w-4 h-4" />,
     },
     {
       id: "supplier-inbound",
-      title: "Supplier & Inbound Flow",
+      title: "Supplier / Inbound",
       status: "watchlist" as StatusLevel,
       uses: "Supplier OTIF, PO status, ASN, ETA, fill rate",
-      detects: "Inbound timing and fill-rate risk",
+      detects: "Check supply feasibility",
       output: "Expedite, substitute, or confirm receipt",
       metric: "43 at-risk POs",
-      icon: <Truck className="w-4 h-4" />,
     },
     {
       id: "dc-capacity",
-      title: "DC Capacity & Transportation",
+      title: "DC / Transport",
       status: "critical" as StatusLevel,
       uses: "DC capacity, trailer dwell, lane performance",
-      detects: "Network execution constraint",
+      detects: "Confirm network execution",
       output: "Wave sequencing or route capacity recommendation",
       metric: "3 DCs at capacity risk",
-      icon: <Link2 className="w-4 h-4" />,
     },
     {
       id: "store-execution",
       title: "Store Execution",
       status: "critical" as StatusLevel,
       uses: "Delivery-to-shelf, backroom aging, display readiness",
-      detects: "Store execution blocker",
+      detects: "Verify shelf availability",
       output: "Field action or verification approval",
       metric: "31.4 hr delivery-to-shelf cycle",
-      icon: <Store className="w-4 h-4" />,
     },
   ]
 
@@ -1019,53 +1013,50 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
           </div>
         </section>
 
-        {/* ── Section 4: AI segmentation and signal flow ─────────────────── */}
+        {/* ── Section 4: Connector strip ─────────────────────────────────── */}
         <section>
           <SectionHeader
             title="How the Cockpit Connects the System"
-            subtitle="AI segmentation creates the operating logic; each downstream tab applies that logic to a different supply chain decision point."
+            subtitle="AI segmentation creates the operating logic; each downstream tab applies it to one supply chain decision point."
           />
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          {/* Horizontal connector strip */}
+          <div className="flex items-stretch gap-0 overflow-x-auto pb-1">
             {FLOW_STAGES.map((stage, i) => (
-              <div
-                key={stage.id}
-                className="rounded-xl border border-border bg-card px-4 py-4 hover:border-primary/30 hover:shadow-md transition-all group cursor-pointer flex flex-col"
-                onClick={() => openDrawer(SIGNAL_FLOW_DRAWERS[stage.id])}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-primary shrink-0">
-                    {stage.icon}
+              <div key={stage.id} className="flex items-stretch shrink-0 min-w-0">
+                {/* Step pill */}
+                <button
+                  onClick={() => openDrawer(SIGNAL_FLOW_DRAWERS[stage.id])}
+                  className="group flex flex-col items-start rounded-xl border border-border bg-card px-4 py-3.5 hover:border-primary/40 hover:shadow-md transition-all text-left w-[168px] shrink-0"
+                >
+                  <div className="flex items-center gap-2 mb-2 w-full">
+                    <span className="text-[9px] font-bold text-muted-foreground font-mono bg-muted border border-border px-1.5 py-0.5 rounded shrink-0">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <StatusBadge status={stage.status} />
                   </div>
-                  <StatusBadge status={stage.status} />
-                </div>
-                <p className="text-[11px] font-bold text-foreground leading-snug mb-2.5">{stage.title}</p>
-                <div className="space-y-1.5 flex-1 text-[10px] text-muted-foreground">
-                  <p><span className="font-semibold text-foreground">Uses:</span> {stage.uses}</p>
-                  <p><span className="font-semibold text-foreground">Detects:</span> {stage.detects}</p>
-                  <p><span className="font-semibold text-foreground">Output:</span> {stage.output}</p>
-                </div>
-                <div className="mt-3 pt-3 border-t border-border">
-                  <p className="text-[11px] font-bold text-foreground mb-2">{stage.metric}</p>
-                  <div className="flex items-center gap-2">
-                    <button
+                  <p className="text-[11px] font-bold text-foreground leading-snug mb-1.5 text-balance">{stage.title}</p>
+                  <p className="text-[10px] text-muted-foreground leading-snug mb-3 flex-1">{stage.detects}</p>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <span
+                      role="button"
+                      tabIndex={0}
                       className="text-[10px] font-semibold text-primary hover:underline"
                       onClick={e => { e.stopPropagation(); handleGoToTab(stage.id) }}
+                      onKeyDown={e => e.key === "Enter" && handleGoToTab(stage.id)}
                     >
                       Open tab
-                    </button>
-                    <span className="text-muted-foreground">·</span>
-                    <button
-                      className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={e => { e.stopPropagation(); openDrawer(SIGNAL_FLOW_DRAWERS[stage.id]) }}
-                    >
+                    </span>
+                    <span className="text-muted-foreground text-[10px]">·</span>
+                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">
                       Explain
-                    </button>
+                    </span>
                   </div>
-                </div>
-                {/* connector arrow */}
+                </button>
+
+                {/* Arrow connector between steps */}
                 {i < FLOW_STAGES.length - 1 && (
-                  <div className="hidden xl:block absolute -right-1.5 top-1/2 -translate-y-1/2 text-border">
-                    <ChevronRight className="w-3.5 h-3.5" />
+                  <div className="flex items-center px-1 shrink-0 text-muted-foreground/40">
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 )}
               </div>
