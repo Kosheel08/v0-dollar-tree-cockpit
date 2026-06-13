@@ -9,9 +9,10 @@ export default function DemandPlanningSummary() {
         <p className="text-xs text-muted-foreground leading-relaxed">
           Forecast accuracy has improved to{" "}
           <span className="font-semibold text-foreground">86.4%</span>, but under-forecast bias remains
-          concentrated in Seasonal, Consumables, and Party. The highest-value intervention is a targeted
-          Seasonal forecast uplift in the Southeast, followed by Midwest consumables validation and Party
-          promotion calendar confirmation.
+          concentrated in Seasonal / Event, Consistent Replenishment, and Promo / Merchant-Driven SKU segments.
+          The highest-value intervention is a targeted Seasonal / Event forecast uplift in the Southeast,
+          followed by Midwest Consistent Replenishment validation and Promo / Merchant-Driven promotion
+          calendar confirmation.
         </p>
 
         <div className="bg-accent/60 border border-primary/25 rounded-lg px-4 py-3 flex items-start gap-3">

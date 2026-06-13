@@ -37,10 +37,13 @@ export default function SKUApprovalWorkbench({ onOpenDrawer }: SKUApprovalWorkbe
           const cfg = statusConfig[effectiveStatus]
 
           return (
-            <button
+            <div
               key={card.id}
+              role="button"
+              tabIndex={0}
               onClick={() => onOpenDrawer(card.drawer)}
-              className="bg-card border border-border rounded-xl p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-col gap-3"
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpenDrawer(card.drawer) } }}
+              className="bg-card border border-border rounded-xl p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-col gap-3 cursor-pointer"
             >
               {/* Top */}
               <div className="flex items-start justify-between gap-2">
@@ -97,7 +100,7 @@ export default function SKUApprovalWorkbench({ onOpenDrawer }: SKUApprovalWorkbe
                   </button>
                 </div>
               )}
-            </button>
+            </div>
           )
         })}
       </div>
