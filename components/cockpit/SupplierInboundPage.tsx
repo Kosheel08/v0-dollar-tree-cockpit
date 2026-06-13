@@ -10,6 +10,8 @@ import SIPORiskLanes from "./SIPORiskLanes"
 import SIDCReceiptReadiness from "./SIDCReceiptReadiness"
 import SIRecoveryActions from "./SIRecoveryActions"
 import SIFlowSummary from "./SIFlowSummary"
+import AIActionsModule from "./AIActionsModule"
+import { supplierActions, supplierApprovals } from "./AIActionsData"
 
 const supplierOptions = [
   "All Suppliers",
@@ -45,7 +47,11 @@ const riskOptions = ["All Statuses", "Critical", "Watchlist", "Stable", "Recover
 const selectCls =
   "h-8 text-xs bg-background border border-border rounded-md px-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
 
-export default function SupplierInboundPage() {
+interface SupplierInboundPageProps {
+  onGoToTab?: (tab: string) => void
+}
+
+export default function SupplierInboundPage({ onGoToTab }: SupplierInboundPageProps) {
   const [supplier, setSupplier] = useState("All Suppliers")
   const [segment, setSegment] = useState("All Segments")
   const [dc, setDc] = useState("All DCs")
@@ -129,6 +135,15 @@ export default function SupplierInboundPage() {
 
       {/* Section 6 — Recovery Action Center */}
       <SIRecoveryActions />
+
+      {/* Section 6b — AI Actions & Human Approvals */}
+      <section className="rounded-2xl border border-border bg-card px-6 py-5">
+        <AIActionsModule
+          actions={supplierActions}
+          approvals={supplierApprovals}
+          onGoToTab={onGoToTab ?? (() => {})}
+        />
+      </section>
 
       {/* Section 7 — Summary */}
       <SIFlowSummary />

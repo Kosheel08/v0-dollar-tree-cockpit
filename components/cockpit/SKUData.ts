@@ -21,6 +21,10 @@ export interface DrawerPayload {
   segmentStrategy?: string
   humanApprovalRequired?: boolean
   guardrailNote?: string
+  // Business context fields
+  businessImpact?: string
+  recommendedAction?: string
+  primarySourceTabId?: string
 }
 
 // ---------------------------------------------------------------------------

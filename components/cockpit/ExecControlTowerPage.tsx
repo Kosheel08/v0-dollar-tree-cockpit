@@ -10,6 +10,8 @@ import ECTScenarioView from "./ECTScenarioView"
 import ECTExecutiveBrief from "./ECTExecutiveBrief"
 import ECTDetailDrawer from "./ECTDetailDrawer"
 import type { DrawerPayload } from "./ECTData"
+import AIActionsModule from "./AIActionsModule"
+import { ectActions, ectApprovals } from "./AIActionsData"
 
 const SELECT_CLS = "text-xs border border-border rounded-lg bg-card text-foreground px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
 
@@ -121,6 +123,15 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
 
         {/* S3 — Source tab summaries */}
         <ECTSourceSummaryCards onOpenDrawer={openDrawer} onGoToTab={handleGoToTab} />
+
+        {/* S3b — AI Actions & Human Approvals (exec cross-functional summary) */}
+        <section className="rounded-2xl border border-border bg-card px-6 py-5">
+          <AIActionsModule
+            actions={ectActions}
+            approvals={ectApprovals}
+            onGoToTab={handleGoToTab}
+          />
+        </section>
 
         {/* S4 — Executive decisions */}
         <div ref={decisionsRef}>

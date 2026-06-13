@@ -10,13 +10,19 @@ import DcImbalanceMatrix from "@/components/cockpit/DcImbalanceMatrix"
 import TransferRecommendations from "@/components/cockpit/TransferRecommendations"
 import AllocationExceptionReview from "@/components/cockpit/AllocationExceptionReview"
 import InvAllocationSummary from "@/components/cockpit/InvAllocationSummary"
+import AIActionsModule from "@/components/cockpit/AIActionsModule"
+import { inventoryActions, inventoryApprovals } from "@/components/cockpit/AIActionsData"
 
 const segments  = ["All Segments","Consistent Replenishment","Seasonal / Event","Treasure Hunt / Limited Buy","Promo / Merchant-Driven","Constrained / Exception"]
 const regions     = ["All Regions","Southeast","Midwest","Northeast","Southwest","West"]
 const nodes       = ["All Nodes","Stores","DCs","In Transit","Available to Allocate"]
 const horizons    = ["2 Weeks","4 Weeks","8 Weeks","13 Weeks"]
 
-export default function InventoryAllocationPage() {
+interface InventoryAllocationPageProps {
+  onGoToTab?: (tab: string) => void
+}
+
+export default function InventoryAllocationPage({ onGoToTab }: InventoryAllocationPageProps) {
   const [segment,  setSegment]  = useState("All Segments")
   const [region,   setRegion]   = useState("All Regions")
   const [node,     setNode]     = useState("All Nodes")
@@ -113,6 +119,16 @@ export default function InventoryAllocationPage() {
         <DcImbalanceMatrix />
         <TransferRecommendations />
         <AllocationExceptionReview />
+
+        {/* AI Actions & Human Approvals */}
+        <section className="rounded-2xl border border-border bg-card px-6 py-5">
+          <AIActionsModule
+            actions={inventoryActions}
+            approvals={inventoryApprovals}
+            onGoToTab={onGoToTab ?? (() => {})}
+          />
+        </section>
+
         <InvAllocationSummary />
       </main>
     </div>

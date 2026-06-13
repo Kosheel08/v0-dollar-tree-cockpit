@@ -11,6 +11,8 @@ import SEAccuracyDiagnostics from "./SEAccuracyDiagnostics"
 import SEFieldActionQueue   from "./SEFieldActionQueue"
 import SEDetailDrawer       from "./SEDetailDrawer"
 import type { DetailItem }  from "./SEData"
+import AIActionsModule from "./AIActionsModule"
+import { storeActions, storeApprovals } from "./AIActionsData"
 
 // ─── filter helpers ────────────────────────────────────────────────────────────
 function Select({ label, options }: { label: string; options: string[] }) {
@@ -30,7 +32,11 @@ function Select({ label, options }: { label: string; options: string[] }) {
 }
 
 // ─── page ──────────────────────────────────────────────────────────────────────
-export default function StoreExecutionPage() {
+interface StoreExecutionPageProps {
+  onGoToTab?: (tab: string) => void
+}
+
+export default function StoreExecutionPage({ onGoToTab }: StoreExecutionPageProps) {
   const [search, setSearch]           = useState("")
   const [drawerOpen, setDrawerOpen]   = useState(false)
   const [selected, setSelected]       = useState<DetailItem | null>(null)
@@ -141,9 +147,18 @@ export default function StoreExecutionPage() {
           <SEAccuracyDiagnostics onSelect={openDrawer} />
         </section>
 
-        {/* S7 — Field Action Queue */}
+        {/* S7 — Field Action */}
         <section>
           <SEFieldActionQueue onSelect={openDrawer} />
+        </section>
+
+        {/* S7b — AI Actions & Human Approvals */}
+        <section className="rounded-2xl border border-border bg-card px-6 py-5">
+          <AIActionsModule
+            actions={storeActions}
+            approvals={storeApprovals}
+            onGoToTab={onGoToTab ?? (() => {})}
+          />
         </section>
 
         {/* S8 — Summary */}

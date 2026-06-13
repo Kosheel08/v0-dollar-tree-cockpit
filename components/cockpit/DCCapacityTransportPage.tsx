@@ -12,6 +12,8 @@ import DCBottleneckPanel from "./DCBottleneckPanel"
 import DCNetworkRecovery from "./DCNetworkRecovery"
 import DCTransportSummary from "./DCTransportSummary"
 import DCTDetailDrawer from "./DCTDetailDrawer"
+import AIActionsModule from "./AIActionsModule"
+import { dcActions, dcApprovals } from "./AIActionsData"
 
 type DetailType = "dc" | "lane" | "bottleneck" | "heatmap" | null
 
@@ -24,6 +26,10 @@ const DC_OPTIONS = ["All DCs", "Savannah DC", "Joliet DC", "Chesapeake DC", "Mar
 const REGION_OPTIONS = ["All Regions", "Southeast", "Midwest", "Northeast", "Southwest", "West", "Central"]
 const FLOW_OPTIONS = ["All Flow Types", "Receiving", "Putaway", "Picking", "Shipping", "Store Delivery"]
 const RISK_OPTIONS = ["All Statuses", "Critical", "Watchlist", "Stable", "Recovering"]
+
+interface DCCapacityTransportPageProps {
+  onGoToTab?: (tab: string) => void
+}
 
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   return (
@@ -38,7 +44,7 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
   )
 }
 
-export default function DCCapacityTransportPage() {
+export default function DCCapacityTransportPage({ onGoToTab }: DCCapacityTransportPageProps) {
   const [dcFilter, setDcFilter] = useState("All DCs")
   const [regionFilter, setRegionFilter] = useState("All Regions")
   const [flowFilter, setFlowFilter] = useState("All Flow Types")
@@ -122,6 +128,16 @@ export default function DCCapacityTransportPage() {
         <TransportLaneRiskBoard onSelect={openLane} />
         <DCBottleneckPanel onSelect={openBottleneck} />
         <DCNetworkRecovery />
+
+        {/* AI Actions & Human Approvals */}
+        <section className="rounded-2xl border border-border bg-card px-6 py-5">
+          <AIActionsModule
+            actions={dcActions}
+            approvals={dcApprovals}
+            onGoToTab={onGoToTab ?? (() => {})}
+          />
+        </section>
+
         <DCTransportSummary />
       </div>
 

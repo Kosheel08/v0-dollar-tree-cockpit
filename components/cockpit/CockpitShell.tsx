@@ -21,11 +21,11 @@ export default function CockpitShell() {
       <div className="flex-1 overflow-y-auto">
         {activeTab === "executive-tower" && <ExecControlTowerPage onGoToTab={setActiveTab} />}
         {activeTab === "sku-segmentation" && <SKUSegmentationPage onGoToTab={setActiveTab} />}
-        {activeTab === "demand" && <DemandPlanningPage />}
-        {activeTab === "inventory" && <InventoryAllocationPage />}
-        {activeTab === "supplier-inbound" && <SupplierInboundPage />}
-        {activeTab === "dc-capacity" && <DCCapacityTransportPage />}
-        {activeTab === "store-execution" && <StoreExecutionPage />}
+        {activeTab === "demand" && <DemandPlanningPage onGoToTab={setActiveTab} />}
+        {activeTab === "inventory" && <InventoryAllocationPage onGoToTab={setActiveTab} />}
+        {activeTab === "supplier-inbound" && <SupplierInboundPage onGoToTab={setActiveTab} />}
+        {activeTab === "dc-capacity" && <DCCapacityTransportPage onGoToTab={setActiveTab} />}
+        {activeTab === "store-execution" && <StoreExecutionPage onGoToTab={setActiveTab} />}
         {!WIRED.includes(activeTab) && (
           <div className="flex items-center justify-center h-full min-h-screen">
             <div className="text-center">

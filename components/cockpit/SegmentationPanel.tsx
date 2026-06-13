@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 const segmentChips = ["All", "Consistent Replenishment", "Seasonal / Event", "Treasure Hunt / Limited Buy", "Promo / Merchant-Driven", "Constrained / Exception"]
 const regionChips = ["All", "Southeast", "Midwest", "Northeast", "Southwest", "West"]
 
-const planningCutData: Record<string, Record<string, { accuracy: string; bias: string; risk: string; recommendation: string }>> = {
+const planningCutData: Record<string, { accuracy: string; bias: string; risk: string; recommendation: string }> = {
   "Seasonal / Event · Southeast": {
     accuracy: "79.8%",
     bias: "-8.7%",

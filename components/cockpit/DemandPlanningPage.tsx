@@ -10,8 +10,14 @@ import RiskMatrix from "@/components/cockpit/RiskMatrix"
 import ExceptionReview from "@/components/cockpit/ExceptionReview"
 import PlanningActions from "@/components/cockpit/PlanningActions"
 import DemandPlanningSummary from "@/components/cockpit/DemandPlanningSummary"
+import AIActionsModule from "@/components/cockpit/AIActionsModule"
+import { demandActions, demandApprovals } from "@/components/cockpit/AIActionsData"
 
-export default function DemandPlanningPage() {
+interface DemandPlanningPageProps {
+  onGoToTab?: (tab: string) => void
+}
+
+export default function DemandPlanningPage({ onGoToTab }: DemandPlanningPageProps) {
   const [segment, setSegment] = useState("All Segments")
   const [region, setRegion] = useState("All Regions")
   const [horizon, setHorizon] = useState("4 Weeks")
@@ -76,6 +82,15 @@ export default function DemandPlanningPage() {
 
         {/* Section 6: Planning actions */}
         <PlanningActions />
+
+        {/* Section 6b: AI Actions & Human Approvals */}
+        <section className="rounded-2xl border border-border bg-card px-6 py-5">
+          <AIActionsModule
+            actions={demandActions}
+            approvals={demandApprovals}
+            onGoToTab={onGoToTab ?? (() => {})}
+          />
+        </section>
 
         {/* Section 7: Summary */}
         <DemandPlanningSummary />
