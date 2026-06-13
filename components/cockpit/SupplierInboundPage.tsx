@@ -21,7 +21,14 @@ const supplierOptions = [
   "Everyday Basics Manufacturing",
 ]
 
-const categoryOptions = ["All Categories", "Seasonal", "Consumables", "Party", "Household", "Health & Beauty"]
+const segmentOptions = [
+  "All Segments",
+  "Consistent Replenishment",
+  "Seasonal / Event",
+  "Treasure Hunt / Limited Buy",
+  "Promo / Merchant-Driven",
+  "Constrained / Exception",
+]
 
 const dcOptions = [
   "All DCs",
@@ -40,7 +47,7 @@ const selectCls =
 
 export default function SupplierInboundPage() {
   const [supplier, setSupplier] = useState("All Suppliers")
-  const [category, setCategory] = useState("All Categories")
+  const [segment, setSegment] = useState("All Segments")
   const [dc, setDc] = useState("All DCs")
   const [riskStatus, setRiskStatus] = useState("All Statuses")
   const [search, setSearch] = useState("")
@@ -70,8 +77,8 @@ export default function SupplierInboundPage() {
           {supplierOptions.map((o) => <option key={o}>{o}</option>)}
         </select>
 
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectCls}>
-          {categoryOptions.map((o) => <option key={o}>{o}</option>)}
+        <select value={segment} onChange={(e) => setSegment(e.target.value)} className={selectCls}>
+          {segmentOptions.map((o) => <option key={o}>{o}</option>)}
         </select>
 
         <select value={dc} onChange={(e) => setDc(e.target.value)} className={selectCls}>

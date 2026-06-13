@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 const riskRows = [
   {
     priority: "P1",
-    category: "Seasonal",
+    category: "Seasonal / Event · Halloween décor",
     region: "Southeast",
     accuracy: "74.2%",
     bias: "-11.4%",
@@ -14,7 +14,7 @@ const riskRows = [
   },
   {
     priority: "P1",
-    category: "Consumables",
+    category: "Consistent Replen. · Paper goods",
     region: "Midwest",
     accuracy: "79.1%",
     bias: "-6.7%",
@@ -25,7 +25,7 @@ const riskRows = [
   },
   {
     priority: "P2",
-    category: "Party",
+    category: "Promo / Merchant-Driven · Party endcap",
     region: "Northeast",
     accuracy: "82.5%",
     bias: "-5.2%",
@@ -36,7 +36,7 @@ const riskRows = [
   },
   {
     priority: "P2",
-    category: "Household",
+    category: "Treasure Hunt / Limited Buy",
     region: "Southwest",
     accuracy: "89.4%",
     bias: "+2.1%",
@@ -47,7 +47,7 @@ const riskRows = [
   },
   {
     priority: "P3",
-    category: "Health & Beauty",
+    category: "Constrained / Exception · Cleaning",
     region: "West",
     accuracy: "91.0%",
     bias: "+0.8%",
@@ -85,7 +85,7 @@ export default function RiskMatrix() {
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-muted border-b border-border">
-                {["Priority", "Category", "Region", "Forecast Acc.", "Bias", "Rev at Risk", "Service Impact", "Recommended Action", "Status"].map((h) => (
+                {["Priority", "SKU Segment", "Region", "Forecast Acc.", "Bias", "Rev at Risk", "Service Impact", "Recommended Action", "Status"].map((h) => (
                   <th
                     key={h}
                     className="px-3 py-2.5 text-left font-semibold text-muted-foreground whitespace-nowrap first:pl-5 last:pr-5"

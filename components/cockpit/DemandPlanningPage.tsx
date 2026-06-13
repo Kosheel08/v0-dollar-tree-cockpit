@@ -12,7 +12,7 @@ import PlanningActions from "@/components/cockpit/PlanningActions"
 import DemandPlanningSummary from "@/components/cockpit/DemandPlanningSummary"
 
 export default function DemandPlanningPage() {
-  const [category, setCategory] = useState("All Categories")
+  const [segment, setSegment] = useState("All Segments")
   const [region, setRegion] = useState("All Regions")
   const [horizon, setHorizon] = useState("4 Weeks")
   const [scenario, setScenario] = useState("Baseline")
@@ -26,7 +26,7 @@ export default function DemandPlanningPage() {
           <div>
             <h1 className="text-lg font-bold text-foreground tracking-tight">Demand Planning</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Forecast accuracy, bias, and revenue-at-risk signals across categories and regions
+              Forecast accuracy, bias, and revenue-at-risk signals across SKU segments and regions
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -43,12 +43,12 @@ export default function DemandPlanningPage() {
         {/* ONE global filter bar — no duplicates */}
         <div className="mt-4">
           <FilterBar
-            category={category}
+            segment={segment}
             region={region}
             horizon={horizon}
             scenario={scenario}
             search={search}
-            onCategory={setCategory}
+            onSegment={setSegment}
             onRegion={setRegion}
             onHorizon={setHorizon}
             onScenario={setScenario}
@@ -65,8 +65,8 @@ export default function DemandPlanningPage() {
         {/* Section 2: Forecast analytics */}
         <ForecastAnalytics />
 
-        {/* Section 3: Segmentation */}
-        <SegmentationPanel globalCategory={category} globalRegion={region} />
+        {/* Section 3: SKU Segment & Region Performance */}
+        <SegmentationPanel globalSegment={segment} globalRegion={region} />
 
         {/* Section 4: Risk matrix */}
         <RiskMatrix />

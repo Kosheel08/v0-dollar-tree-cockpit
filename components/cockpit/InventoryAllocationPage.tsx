@@ -11,13 +11,13 @@ import TransferRecommendations from "@/components/cockpit/TransferRecommendation
 import AllocationExceptionReview from "@/components/cockpit/AllocationExceptionReview"
 import InvAllocationSummary from "@/components/cockpit/InvAllocationSummary"
 
-const categories  = ["All Categories","Household","Consumables","Seasonal","Party","Health & Beauty"]
+const segments  = ["All Segments","Consistent Replenishment","Seasonal / Event","Treasure Hunt / Limited Buy","Promo / Merchant-Driven","Constrained / Exception"]
 const regions     = ["All Regions","Southeast","Midwest","Northeast","Southwest","West"]
 const nodes       = ["All Nodes","Stores","DCs","In Transit","Available to Allocate"]
 const horizons    = ["2 Weeks","4 Weeks","8 Weeks","13 Weeks"]
 
 export default function InventoryAllocationPage() {
-  const [category, setCategory] = useState("All Categories")
+  const [segment,  setSegment]  = useState("All Segments")
   const [region,   setRegion]   = useState("All Regions")
   const [node,     setNode]     = useState("All Nodes")
   const [horizon,  setHorizon]  = useState("4 Weeks")
@@ -49,11 +49,11 @@ export default function InventoryAllocationPage() {
         <div className="mt-4">
           <div className="bg-card border border-border rounded-xl px-4 py-3 flex flex-wrap items-center gap-2.5">
             <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={segment}
+              onChange={(e) => setSegment(e.target.value)}
               className="h-8 text-xs bg-background border border-border rounded-md px-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
             >
-              {categories.map((c) => <option key={c}>{c}</option>)}
+              {segments.map((c) => <option key={c}>{c}</option>)}
             </select>
 
             <select
@@ -84,7 +84,7 @@ export default function InventoryAllocationPage() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search SKU, category, DC, store, or region"
+                placeholder="Search SKU, segment, DC, store, or region"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-8 w-full text-xs bg-background border border-border rounded-md pl-8 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"

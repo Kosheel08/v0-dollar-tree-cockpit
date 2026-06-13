@@ -28,19 +28,19 @@ const accuracyData = [
 ]
 
 const biasData = [
-  { category: "Household", bias: 1.8 },
-  { category: "Consumables", bias: -3.2 },
-  { category: "Seasonal", bias: -9.6 },
-  { category: "Party", bias: -5.1 },
-  { category: "H&B", bias: 0.7 },
+  { category: "Cons. Replen.", bias: 1.8 },
+  { category: "Seasonal/Evt", bias: -9.6 },
+  { category: "Promo/Merch", bias: -5.1 },
+  { category: "Treas. Hunt", bias: -3.2 },
+  { category: "Constrained", bias: 0.7 },
 ]
 
 const revenueRisk = [
-  { category: "Seasonal", value: "$3.8M", raw: 3.8, status: "Critical", stores: "52 stores" },
-  { category: "Consumables", value: "$2.6M", raw: 2.6, status: "Critical", stores: "31 stores" },
-  { category: "Party", value: "$1.9M", raw: 1.9, status: "Watchlist", stores: "24 stores" },
-  { category: "Household", value: "$940K", raw: 0.94, status: "Stable", stores: "12 stores" },
-  { category: "Health & Beauty", value: "$610K", raw: 0.61, status: "Stable", stores: "8 stores" },
+  { category: "Seasonal / Event · Halloween décor", value: "$3.8M", raw: 3.8, status: "Critical", stores: "52 stores" },
+  { category: "Consistent Replen. · Paper goods", value: "$2.6M", raw: 2.6, status: "Critical", stores: "31 stores" },
+  { category: "Promo / Merchant-Driven · Party endcap", value: "$1.9M", raw: 1.9, status: "Watchlist", stores: "24 stores" },
+  { category: "Treasure Hunt / Limited Buy", value: "$940K", raw: 0.94, status: "Stable", stores: "12 stores" },
+  { category: "Constrained / Exception · Cleaning", value: "$610K", raw: 0.61, status: "Stable", stores: "8 stores" },
 ]
 
 const statusBadge: Record<string, string> = {
@@ -134,10 +134,10 @@ export default function ForecastAnalytics() {
         {/* Insight pills */}
         <div className="flex flex-wrap gap-2 pt-1 border-t border-border">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-md text-[11px] text-emerald-700 font-medium">
-            Best category: Household · 91.2%
+            Best segment: Consistent Replenishment · 91.2%
           </span>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 border border-rose-200 rounded-md text-[11px] text-rose-700 font-medium">
-            Largest deterioration: Seasonal · -5.4 pts
+            Largest gap: Seasonal / Event · -5.4 pts
           </span>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-md text-[11px] text-amber-700 font-medium">
             Variance: Moderate
@@ -150,7 +150,7 @@ export default function ForecastAnalytics() {
         {/* Bias chart */}
         <div className="bg-card border border-border rounded-xl p-5 shadow-sm flex flex-col gap-3">
           <div>
-            <p className="text-sm font-semibold text-foreground">Forecast Bias by Category</p>
+            <p className="text-sm font-semibold text-foreground">Forecast Bias by SKU Segment</p>
             <p className="text-xs text-muted-foreground mt-0.5">Negative values indicate under-forecasting</p>
           </div>
           <ResponsiveContainer width="100%" height={160}>
@@ -178,7 +178,7 @@ export default function ForecastAnalytics() {
             </BarChart>
           </ResponsiveContainer>
           <p className="text-[11px] text-muted-foreground leading-relaxed border-t border-border pt-2">
-            Seasonal and Party are the primary drivers of under-forecast exposure.
+            Seasonal / Event and Promo / Merchant-Driven are the primary drivers of under-forecast exposure.
           </p>
         </div>
 
@@ -186,7 +186,7 @@ export default function ForecastAnalytics() {
         <div className="bg-card border border-border rounded-xl p-5 shadow-sm flex flex-col gap-3 flex-1">
           <div>
             <p className="text-sm font-semibold text-foreground">Revenue at Risk Cockpit</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Risk concentration by category and horizon</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Risk concentration by SKU segment and horizon</p>
           </div>
           <div className="space-y-1.5">
             {revenueRisk.map(({ category, value, status, stores }, i) => (

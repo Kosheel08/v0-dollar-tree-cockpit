@@ -94,7 +94,7 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
             <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <input
               type="text"
-              placeholder="Search risk, category, region, DC, supplier, or store issue"
+              placeholder="Search risk, segment, region, DC, supplier, or store issue"
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full"

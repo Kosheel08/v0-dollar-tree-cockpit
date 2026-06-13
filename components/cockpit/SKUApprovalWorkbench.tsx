@@ -5,7 +5,6 @@ import { CheckCircle2, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { approvalCards } from "./SKUData"
 import type { DrawerPayload, StatusLevel } from "./SKUData"
-import ECTSectionHeader from "./ECTSectionHeader"
 
 const statusConfig: Record<StatusLevel, { badge: string; text: string }> = {
   critical:         { badge: "bg-[var(--status-critical-bg)] text-[var(--status-critical)] border border-[var(--status-critical)]/20",     text: "Critical" },
@@ -31,12 +30,6 @@ export default function SKUApprovalWorkbench({ onOpenDrawer }: SKUApprovalWorkbe
 
   return (
     <div>
-      <ECTSectionHeader
-        title="Human Approval Workbench"
-        subtitle="High-impact SKU decisions where AI recommends action but requires planner approval"
-        className="mb-4"
-      />
-
       <div className="grid grid-cols-2 gap-4">
         {approvalCards.map((card) => {
           const isApproved = approvedIds.has(card.id)

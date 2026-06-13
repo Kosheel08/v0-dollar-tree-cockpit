@@ -9,9 +9,10 @@ import SKUSummaryStrip from "./SKUSummaryStrip"
 import SKUSegmentCards from "./SKUSegmentCards"
 import SKUClassificationFlow from "./SKUClassificationFlow"
 import SKUPerformanceMatrix from "./SKUPerformanceMatrix"
-import SKUDecisionLog from "./SKUDecisionLog"
 import SKUApprovalWorkbench from "./SKUApprovalWorkbench"
 import SKUSummaryBrief from "./SKUSummaryBrief"
+import SKUAgentLog from "./SKUAgentLog"
+import { Users } from "lucide-react"
 
 const CATEGORIES = ["All Categories", "Consumables", "Seasonal", "Party", "Household", "Health & Beauty"]
 const SEGMENTS   = ["All Segments", "Consistent Replenishment", "Seasonal / Event", "Treasure Hunt / Limited Buy", "Promo / Merchant-Driven", "Constrained / Exception"]
@@ -108,11 +109,32 @@ export default function SKUSegmentationPage({ onGoToTab }: { onGoToTab: (tab: st
         {/* S4 — Performance matrix */}
         <SKUPerformanceMatrix onOpenDrawer={openDrawer} />
 
-        {/* S5 — Decision log */}
-        <SKUDecisionLog onOpenDrawer={openDrawer} />
+        {/* Agentic AI divider */}
+        <div className="border-t border-border pt-2">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">
+            Agentic AI layer — autonomous actions and human approvals
+          </p>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            SKU Segment is assigned by this tab and determines the planning, allocation, fulfillment, and approval strategy used across the cockpit.
+          </p>
+        </div>
 
-        {/* S6 — Approval workbench */}
-        <SKUApprovalWorkbench onOpenDrawer={openDrawer} />
+        {/* S5 — AI Actions Completed */}
+        <SKUAgentLog onOpenDrawer={openDrawer} onGoToTab={onGoToTab} />
+
+        {/* S6 — Human Approval Required */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-5 h-5 rounded-md bg-amber-500 flex items-center justify-center shrink-0">
+              <Users className="w-3 h-3 text-white" />
+            </div>
+            <p className="text-[13px] font-semibold text-foreground">Human Approval Required</p>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed ml-7 mb-4">
+            High-impact or constrained SKU decisions where AI recommends action but keeps a human in the loop
+          </p>
+          <SKUApprovalWorkbench onOpenDrawer={openDrawer} />
+        </div>
 
         {/* S7 — Summary brief */}
         <SKUSummaryBrief />
