@@ -8,12 +8,31 @@ import SKUDetailDrawer from "./SKUDetailDrawer"
 import type { DrawerPayload } from "./SKUData"
 
 const chartData = [
-  { segment: "Consistent\nReplenishment", short: "Cons. Repl.",  onHand: 26.8, allocated: 19.4, available: 7.4,  target: 30.0 },
-  { segment: "Seasonal /\nEvent",          short: "Seasonal",    onHand: 18.4, allocated: 12.1, available: 6.3,  target: 22.0 },
-  { segment: "Promo /\nMerchant",          short: "Promo",       onHand: 14.6, allocated: 9.2,  available: 5.4,  target: 16.0 },
-  { segment: "Treasure Hunt /\nLtd. Buy",  short: "Treasure",    onHand: 31.2, allocated: 18.8, available: 12.4, target: 27.0 },
-  { segment: "Constrained /\nException",   short: "Constrained", onHand: 21.5, allocated: 13.6, available: 7.9,  target: 22.0 },
+  { segment: "Consistent Replenishment", short: "Cons. Replen.", onHand: 26.8, allocated: 19.4, available: 7.4,  target: 30.0 },
+  { segment: "Seasonal / Event",         short: "Seasonal",      onHand: 18.4, allocated: 12.1, available: 6.3,  target: 22.0 },
+  { segment: "Promo / Merchant-Driven",  short: "Promo",         onHand: 14.6, allocated: 9.2,  available: 5.4,  target: 16.0 },
+  { segment: "Treasure Hunt / Limited Buy", short: "Treasure Hunt", onHand: 31.2, allocated: 18.8, available: 12.4, target: 27.0 },
+  { segment: "Constrained / Exception",  short: "Constrained",  onHand: 21.5, allocated: 13.6, available: 7.9,  target: 22.0 },
 ]
+
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{name: string; value: number; color: string}>; label?: string }) {
+  if (!active || !payload?.length) return null
+  const row = chartData.find((d) => d.short === label)
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-md px-3 py-2.5 text-xs min-w-[170px]">
+      <p className="font-semibold text-gray-800 mb-1.5">{row?.segment ?? label}</p>
+      {payload.map((p) => (
+        <div key={p.name} className="flex items-center justify-between gap-4">
+          <span className="flex items-center gap-1.5 text-gray-600">
+            <span className="inline-block w-2 h-2 rounded-sm" style={{ background: p.color }} />
+            {p.name}
+          </span>
+          <span className="font-medium text-gray-800">${p.value}M</span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const chips: Array<{ label: string; cls: string; drawer: DrawerPayload }> = [
   {
@@ -129,13 +148,13 @@ export default function InvPositionChart({ onGoToTab }: InvPositionChartProps) {
                 tickFormatter={(v) => `$${v}M`}
               />
               <Tooltip
-                contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }}
-                formatter={(val: number, name: string) => [`$${val}M`, name]}
+                cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                content={<CustomTooltip />}
               />
-              <Legend wrapperStyle={{ fontSize: 10, paddingTop: 4 }} />
-              <Bar dataKey="onHand"    name="On Hand"    fill="hsl(var(--primary) / 0.25)" radius={[3,3,0,0]} />
-              <Bar dataKey="allocated" name="Allocated"  fill="hsl(var(--primary) / 0.55)" radius={[3,3,0,0]} />
-              <Bar dataKey="available" name="Available"  fill="hsl(var(--primary))"        radius={[3,3,0,0]} />
+              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} />
+              <Bar dataKey="onHand"    name="On Hand"    fill="#2d7a3a" radius={[3,3,0,0]} />
+              <Bar dataKey="allocated" name="Allocated"  fill="#64748b" radius={[3,3,0,0]} />
+              <Bar dataKey="available" name="Available"  fill="#d97706" radius={[3,3,0,0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
