@@ -16,11 +16,12 @@ import {
   Truck,
   Warehouse,
   Store,
-  ShoppingCart,
   Bot,
   X,
   Bookmark,
-  ArrowDown,
+  TrendingDown,
+  Activity,
+  Cpu,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { StatusLevel } from "./ECTData"
@@ -46,7 +47,7 @@ interface DrawerPayload {
   whyNoApproval?: string
 }
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
+// ─── Status helpers ───────────────────────────────────────────────────────────
 
 const STATUS_CFG: Record<string, { label: string; dot: string; badge: string }> = {
   critical:  { label: "Critical",   dot: "bg-[var(--status-critical)]",  badge: "bg-[var(--status-critical-bg)] text-[var(--status-critical)] border border-[var(--status-critical)]/25"  },
@@ -79,256 +80,167 @@ function StatusBadge({ status, className }: { status: string; className?: string
   )
 }
 
-// ─── Value chain node data ────────────────────────────────────────────────────
+// ─── Value chain nodes (5 operating modules only) ────────────────────────────
 
 const CHAIN_NODES = [
   {
-    id: "sku-segmentation",
-    name: "SKU Strategy",
-    status: "stable",
-    signal: "2,180 SKU families segmented",
-    valueTag: "Strategy set",
-    decisionLink: "Open module",
-    icon: Layers,
-    tabId: "sku-segmentation",
-    drawer: {
-      title: "SKU Strategy",
-      status: "stable" as StatusLevel,
-      explanation: "SKU families are grouped into operating segments so the system applies fit-for-purpose planning logic instead of treating every SKU the same way.",
-      sourceTabs: ["SKU Strategy Segmentation"],
-      primarySourceTabId: "sku-segmentation",
-      metrics: [
-        { label: "SKU families segmented", value: "2,180" },
-        { label: "Segments", value: "5 operating segments" },
-        { label: "Require human review", value: "174" },
-      ],
-      businessImpact: "Segmentation creates the planning logic that every other module depends on.",
-      recommendedAction: "Open the SKU Strategy Segmentation module to review classified SKU families.",
-      openModule: "SKU Strategy Segmentation",
-    },
-  },
-  {
     id: "demand",
-    name: "Demand",
+    name: "Demand Planning",
     status: "critical",
     signal: "-4.8% forecast bias",
-    valueTag: "$3.4M decision",
-    decisionLink: "Forecast uplift",
+    valueTag: "$3.4M uplift + allocation decision",
+    primaryIssue: "Seasonal / Event under-forecast",
+    openLink: "Open Demand Planning",
     icon: BarChart2,
     tabId: "demand",
     drawer: {
-      title: "Demand",
+      title: "Demand Planning",
       status: "critical" as StatusLevel,
-      explanation: "Seasonal / Event demand is under-forecast, creating downstream allocation pressure.",
+      explanation: "Seasonal / Event demand is under-forecast by -4.8%, creating downstream allocation pressure. The system has flagged the bias and created an uplift recommendation, but planner approval is required before the June 30 lock.",
       sourceTabs: ["Demand Planning"],
       primarySourceTabId: "demand",
       metrics: [
-        { label: "Forecast bias", value: "-4.8% overall" },
+        { label: "Forecast bias", value: "-4.8% (Seasonal / Event)" },
         { label: "Stores affected", value: "214" },
         { label: "Value at risk", value: "$3.4M" },
+        { label: "Approval required", value: "Yes — uplift requires planner sign-off" },
       ],
-      businessImpact: "Under-forecast bias in Seasonal / Event creates late-cycle allocation pressure with a narrowing recovery window.",
-      recommendedAction: "Approve the Seasonal / Event forecast uplift before Jun 10.",
-      decision: "Approve Seasonal / Event forecast uplift",
-      protectedValue: "$3.4M combined with protected allocation",
+      businessImpact: "Under-forecast bias in Seasonal / Event creates late-cycle allocation pressure with a narrowing recovery window before the selling period.",
+      recommendedAction: "Approve the Seasonal / Event forecast uplift before the June 30 lock.",
+      decision: "Approve Seasonal / Event forecast uplift and protected allocation",
+      protectedValue: "$3.4M",
       openModule: "Demand Planning",
-      riskIfNotApproved: "Allocation engine locks in under-forecast position",
+      riskIfNotApproved: "Allocation engine locks in under-forecast position for the full planning cycle.",
+      relatedNodes: ["Demand Planning", "Inventory & Allocation"],
     },
   },
   {
     id: "inventory",
-    name: "Inventory",
+    name: "Inventory & Allocation",
     status: "critical",
     signal: "214 stores exposed",
     valueTag: "Protected allocation",
-    decisionLink: "Allocate",
+    primaryIssue: "Allocation readiness constrained",
+    openLink: "Open Inventory & Allocation",
     icon: Package,
     tabId: "inventory",
     drawer: {
-      title: "Inventory",
+      title: "Inventory & Allocation",
       status: "critical" as StatusLevel,
-      explanation: "Inventory is available at the network level, but allocation readiness and store exposure are constrained.",
+      explanation: "Inventory is available at the network level, but allocation readiness is constrained by forecast uncertainty and inbound risk. 214 stores are exposed heading into the selling window.",
       sourceTabs: ["Inventory & Allocation"],
       primarySourceTabId: "inventory",
       metrics: [
         { label: "Available to allocate", value: "$48.6M" },
         { label: "Stores exposed", value: "214" },
         { label: "Allocation readiness", value: "72%" },
+        { label: "Approval required", value: "Yes — protected allocation requires sign-off" },
       ],
-      businessImpact: "Positioning inventory at the right stores before the lock is the single highest-leverage action before Jun 10.",
+      businessImpact: "Positioning inventory at the right stores before the lock is the single highest-leverage action before June 30.",
       recommendedAction: "Approve protected push allocation for high-risk Seasonal / Event stores.",
       decision: "Approve protected push allocation",
+      protectedValue: "$3.4M combined",
       openModule: "Inventory & Allocation",
-      riskIfNotApproved: "214 stores remain undersupplied heading into selling window",
+      riskIfNotApproved: "214 stores remain undersupplied heading into selling window.",
+      relatedNodes: ["Demand Planning", "Inventory & Allocation"],
     },
   },
   {
-    id: "supplier",
-    name: "Vendor / Supplier",
+    id: "supplier-inbound",
+    name: "Supplier & Inbound Flow",
     status: "watchlist",
     signal: "43 at-risk POs",
-    valueTag: "$1.6M decision",
-    decisionLink: "Expedite",
+    valueTag: "$1.6M expedite decision",
+    primaryIssue: "Delayed Seasonal PO",
+    openLink: "Open Supplier & Inbound Flow",
     icon: Truck,
     tabId: "supplier-inbound",
     drawer: {
-      title: "Vendor / Supplier",
+      title: "Supplier & Inbound Flow",
       status: "watchlist" as StatusLevel,
-      explanation: "Supplier and PO risk may delay inventory needed for priority Seasonal / Event and replenishment flows.",
+      explanation: "GreenLeaf Seasonal Imports PO-78421 has slipped 7 days and may miss the Savannah DC receiving window. 43 at-risk POs are connected to downstream store exposure.",
       sourceTabs: ["Supplier & Inbound Flow"],
       primarySourceTabId: "supplier-inbound",
       metrics: [
         { label: "Supplier OTIF", value: "82.7%" },
         { label: "At-risk POs", value: "43" },
         { label: "Combined exposure", value: "$2.7M" },
+        { label: "Approval required", value: "Yes — expedite cost requires approval" },
       ],
-      businessImpact: "Inbound risk not detected early collapses into allocation shortfalls with no recovery time.",
-      recommendedAction: "Approve the GreenLeaf expedite and ValuePack recovery plan.",
-      decision: "Expedite delayed Seasonal / Event inbound PO",
+      businessImpact: "Inbound risk not resolved early collapses into allocation shortfalls with no recovery time before the selling window.",
+      recommendedAction: "Approve the expedite for GreenLeaf PO-78421 into Savannah DC.",
+      decision: "Expedite delayed Seasonal / Event inbound PO into Savannah DC",
       protectedValue: "$1.6M",
       openModule: "Supplier & Inbound Flow",
+      riskIfNotApproved: "42 stores miss Seasonal / Event inventory. Window closes permanently after June 28.",
+      relatedNodes: ["Supplier & Inbound Flow", "DC Capacity & Transportation"],
     },
   },
   {
-    id: "inbound",
-    name: "Inbound",
-    status: "watchlist",
-    signal: "+4.6 days lead-time variance",
-    valueTag: "Recovery path",
-    decisionLink: "Recover",
-    icon: ArrowDown,
-    tabId: "supplier-inbound",
-    drawer: {
-      title: "Inbound",
-      status: "watchlist" as StatusLevel,
-      explanation: "Inbound flow is running later than planned, especially for time-sensitive Seasonal / Event inventory.",
-      sourceTabs: ["Supplier & Inbound Flow"],
-      primarySourceTabId: "supplier-inbound",
-      metrics: [
-        { label: "Lead-time variance", value: "+4.6 days" },
-        { label: "At-risk ETAs", value: "28 ASNs" },
-        { label: "Savannah window risk", value: "Jun 8–9" },
-      ],
-      businessImpact: "Every day of inbound delay narrows the options between expedite, substitute, and accepting the stockout.",
-      recommendedAction: "Approve recovery path or substitute where needed.",
-      decision: "Approve recovery path or substitute where needed",
-      openModule: "Supplier & Inbound Flow",
-    },
-  },
-  {
-    id: "dc",
-    name: "DC",
+    id: "dc-capacity",
+    name: "DC Capacity & Transportation",
     status: "critical",
     signal: "3 DCs at capacity risk",
-    valueTag: "$1.2M decision",
-    decisionLink: "Re-sequence",
+    valueTag: "$1.2M wave change",
+    primaryIssue: "Savannah / Joliet pressure",
+    openLink: "Open DC Capacity & Transportation",
     icon: Warehouse,
     tabId: "dc-capacity",
     drawer: {
-      title: "DC",
+      title: "DC Capacity & Transportation",
       status: "critical" as StatusLevel,
-      explanation: "Savannah and Joliet DC pressure may prevent priority inventory from being processed in time.",
+      explanation: "Savannah DC is operating at 96% capacity with 22.4 hrs trailer dwell. Re-sequencing outbound waves to prioritize 72 high-risk Seasonal / Event stores protects $1.2M but may delay lower-priority replenishment.",
       sourceTabs: ["DC Capacity & Transportation"],
       primarySourceTabId: "dc-capacity",
       metrics: [
         { label: "Savannah DC capacity", value: "96%" },
         { label: "Joliet DC capacity", value: "93%" },
         { label: "DCs at risk", value: "3 (Savannah, Joliet, Chesapeake)" },
+        { label: "Approval required", value: "Yes — operational tradeoff" },
       ],
-      businessImpact: "DC bottlenecks at Savannah and Joliet are compressing delivery windows for Seasonal / Event SKUs across hundreds of stores.",
-      recommendedAction: "Approve the Savannah wave change and overflow route capacity.",
+      businessImpact: "DC bottlenecks at Savannah and Joliet are compressing delivery windows for Seasonal / Event SKUs across 72 stores.",
+      recommendedAction: "Approve the Savannah outbound wave re-sequencing before the next outbound window.",
       decision: "Re-sequence Savannah outbound waves",
       protectedValue: "$1.2M",
       openModule: "DC Capacity & Transportation",
-      riskIfNotApproved: "72 stores miss priority delivery window",
+      riskIfNotApproved: "72 stores miss priority delivery window. Savannah pressure compounds through cycle.",
+      relatedNodes: ["DC Capacity & Transportation", "Store Execution"],
     },
   },
   {
-    id: "transportation",
-    name: "Transportation",
-    status: "critical",
-    signal: "87.9% on-time delivery",
-    valueTag: "$640K decision",
-    decisionLink: "Add capacity",
-    icon: Truck,
-    tabId: "dc-capacity",
-    drawer: {
-      title: "Transportation",
-      status: "critical" as StatusLevel,
-      explanation: "Lane saturation and delivery reliability risk could delay priority shipments to stores.",
-      sourceTabs: ["DC Capacity & Transportation"],
-      primarySourceTabId: "dc-capacity",
-      metrics: [
-        { label: "On-time store delivery", value: "87.9%" },
-        { label: "Lane saturation", value: "High — Southeast corridor" },
-        { label: "Overflow routes available", value: "3 options" },
-      ],
-      businessImpact: "Without route capacity approval, priority Seasonal / Event shipments will miss store delivery windows.",
-      recommendedAction: "Approve overflow route capacity before the next outbound window.",
-      decision: "Approve overflow route capacity",
-      protectedValue: "$640K",
-      openModule: "DC Capacity & Transportation",
-    },
-  },
-  {
-    id: "store",
-    name: "Store",
+    id: "store-execution",
+    name: "Store Execution",
     status: "critical",
     signal: "$4.3M aged in backroom",
-    valueTag: "$1.8M decision",
-    decisionLink: "Field action",
+    valueTag: "$1.8M field action",
+    primaryIssue: "Backroom and display execution gaps",
+    openLink: "Open Store Execution",
     icon: Store,
     tabId: "store-execution",
     drawer: {
-      title: "Store",
+      title: "Store Execution",
       status: "critical" as StatusLevel,
-      explanation: "Delivered inventory is not consistently converting into sellable shelf availability because of backroom aging and task gaps.",
+      explanation: "126 stores have Seasonal / Event and Promo inventory delivered but not processed to shelf. $4.3M is aging in backrooms. Display readiness sits at 59% across the network.",
       sourceTabs: ["Store Execution"],
       primarySourceTabId: "store-execution",
       metrics: [
         { label: "Backroom aging >48 hrs", value: "$4.3M" },
         { label: "Stores affected", value: "126" },
         { label: "Delivery-to-shelf cycle", value: "31.4 hrs (target 20 hrs)" },
+        { label: "Display readiness", value: "59% network average" },
       ],
-      businessImpact: "Every hour of backroom aging during the selling window reduces effective sell-through.",
-      recommendedAction: "Approve field action for backroom aging and display setup.",
-      decision: "Approve field action for backroom aging and display setup",
+      businessImpact: "Every hour of backroom aging during the selling window reduces effective sell-through. Field labor reprioritization is the fastest recovery lever.",
+      recommendedAction: "Approve field action for backroom aging clearance and display setup.",
+      decision: "Clear backroom aging and display setup backlog",
       protectedValue: "$1.8M",
       openModule: "Store Execution",
-      riskIfNotApproved: "$1.8M remains unavailable to customers",
-    },
-  },
-  {
-    id: "shelf",
-    name: "Shelf",
-    status: "critical",
-    signal: "59% display readiness",
-    valueTag: "Verify availability",
-    decisionLink: "Verify",
-    icon: ShoppingCart,
-    tabId: "store-execution",
-    drawer: {
-      title: "Shelf",
-      status: "critical" as StatusLevel,
-      explanation: "Display and shelf verification gaps reduce confidence that inventory is actually available to customers.",
-      sourceTabs: ["Store Execution"],
-      primarySourceTabId: "store-execution",
-      metrics: [
-        { label: "Display readiness", value: "59% network average" },
-        { label: "Stores flagged", value: "53" },
-        { label: "Value at risk", value: "$520K" },
-      ],
-      businessImpact: "Promo allocation to stores without display readiness wastes inventory and inflates backroom aging.",
-      recommendedAction: "Verify shelf availability and display readiness.",
-      decision: "Verify shelf availability and display readiness",
-      openModule: "Store Execution",
+      riskIfNotApproved: "$1.8M remains unavailable to customers during the selling window.",
+      relatedNodes: ["Store Execution"],
     },
   },
 ]
 
-// ─── Risk path connector ──────────────────────────────────────────────────────
-
-const RISK_PATH_IDS = new Set(["demand", "inventory", "inbound", "dc", "store"])
+const RISK_PATH_IDS = new Set(["demand", "inventory", "supplier-inbound", "dc-capacity", "store-execution"])
 
 // ─── Priority decisions ───────────────────────────────────────────────────────
 
@@ -342,16 +254,17 @@ const PRIORITY_DECISIONS = [
     segment: "Seasonal / Event",
     valueProtected: "$3.4M",
     storesImpacted: "72 stores",
-    urgency: "Jun 10 · 5:00 PM",
+    urgency: "June 30 · 5:00 PM",
     owner: "Demand Planning + Allocation",
     whyApproval: "Forecast change and constrained allocation tradeoff require planner sign-off.",
     primaryLabel: "Approve",
     secondaryLabel: "Review Rationale",
     openModuleLabel: "Open Demand Planning",
     openModuleTabId: "demand",
+    dependencyTag: "Demand → Inventory",
     riskIfNotApproved: "Allocation engine locks in under-forecast position for the full planning cycle.",
-    decisionRationale: "The system detected -4.8% Seasonal / Event under-forecast bias and ranked 72 high-risk stores for protected push allocation. Approving before the Jun 10 lock allows the allocation engine to reposition inventory, protecting an estimated $3.4M in directional seasonal revenue.",
-    relatedNodes: ["Demand", "Inventory"],
+    decisionRationale: "The system detected -4.8% Seasonal / Event under-forecast bias and ranked 72 high-risk stores for protected push allocation. Approving before the June 30 lock allows the allocation engine to reposition inventory, protecting an estimated $3.4M in directional seasonal revenue.",
+    relatedNodes: ["Demand Planning", "Inventory & Allocation"],
   },
   {
     id: "pd-2",
@@ -369,9 +282,10 @@ const PRIORITY_DECISIONS = [
     secondaryLabel: "Review Rationale",
     openModuleLabel: "Open Store Execution",
     openModuleTabId: "store-execution",
+    dependencyTag: "Store → Shelf",
     riskIfNotApproved: "$1.8M remains unavailable to customers during the selling window.",
     decisionRationale: "126 stores have Seasonal / Event and Promo / Merchant-Driven inventory delivered but not processed to shelf. $4.3M is aging in backrooms across District 104 (Atlanta Metro) and District 147 (Philadelphia). Prioritizing backroom-to-shelf execution before the selling window is the fastest recovery lever.",
-    relatedNodes: ["Store", "Shelf"],
+    relatedNodes: ["Store Execution"],
   },
   {
     id: "pd-3",
@@ -389,9 +303,10 @@ const PRIORITY_DECISIONS = [
     secondaryLabel: "Review Rationale",
     openModuleLabel: "Open Supplier & Inbound Flow",
     openModuleTabId: "supplier-inbound",
-    riskIfNotApproved: "42 stores miss Seasonal / Event inventory. Window closes permanently after Jun 8.",
-    decisionRationale: "GreenLeaf Seasonal Imports PO-78421 has slipped 7 days and may miss the Savannah DC receiving window before the Jun 10 allocation lock. Expedite cost requires management approval.",
-    relatedNodes: ["Vendor / Supplier", "Inbound", "DC"],
+    dependencyTag: "Supplier → DC",
+    riskIfNotApproved: "42 stores miss Seasonal / Event inventory. Window closes permanently after June 28.",
+    decisionRationale: "GreenLeaf Seasonal Imports PO-78421 has slipped 7 days and may miss the Savannah DC receiving window before the June 30 allocation lock. Expedite cost requires management approval.",
+    relatedNodes: ["Supplier & Inbound Flow", "DC Capacity & Transportation"],
   },
   {
     id: "pd-4",
@@ -409,9 +324,10 @@ const PRIORITY_DECISIONS = [
     secondaryLabel: "Review Rationale",
     openModuleLabel: "Open DC Capacity & Transportation",
     openModuleTabId: "dc-capacity",
+    dependencyTag: "DC → Transportation",
     riskIfNotApproved: "72 stores miss priority delivery window. Savannah pressure compounds through cycle.",
     decisionRationale: "Savannah DC is operating at 96% capacity with 22.4 hrs trailer dwell. Re-sequencing outbound waves to prioritize 72 high-risk Seasonal / Event stores protects $1.2M in estimated delivery value but may delay lower-priority replenishment shipments.",
-    relatedNodes: ["DC", "Transportation"],
+    relatedNodes: ["DC Capacity & Transportation"],
   },
   {
     id: "pd-5",
@@ -422,16 +338,17 @@ const PRIORITY_DECISIONS = [
     segment: "Constrained / Exception",
     valueProtected: "$700K",
     storesImpacted: "31 stores",
-    urgency: "Before allocation lock",
+    urgency: "Before June 30 lock",
     owner: "Supplier Management + Inventory Planning",
     whyApproval: "Substitution affects supplier commitments, allocation, and merchandising.",
     primaryLabel: "Approve Recovery",
     secondaryLabel: "Review Rationale",
     openModuleLabel: "Open Supplier & Inbound Flow",
     openModuleTabId: "supplier-inbound",
+    dependencyTag: "Supplier → Inventory",
     riskIfNotApproved: "31 Midwest stores below replenishment threshold for the cycle.",
     decisionRationale: "ValuePack Consumables PO-78104 shipped at 82% fill versus 96% expected, creating a replenishment gap at 31 Midwest stores. Using substitute SKUs or alternative supplier recovery closes the gap but requires cross-functional approval.",
-    relatedNodes: ["Vendor / Supplier", "Inventory"],
+    relatedNodes: ["Supplier & Inbound Flow", "Inventory & Allocation"],
   },
 ]
 
@@ -458,7 +375,7 @@ const SYSTEM_ACTIONS = [
         { label: "Require human review", value: "174" },
         { label: "Approval required", value: "No — within guardrails" },
       ],
-      businessImpact: "Segmentation enables fit-for-purpose planning across the cockpit. Without it, every SKU defaults to the same replenishment and allocation logic.",
+      businessImpact: "Segmentation-led planning enables fit-for-purpose logic across the cockpit. Without it, every SKU defaults to the same replenishment and allocation logic.",
       recommendedAction: "Open the SKU Strategy Segmentation module to review segment assignments.",
       trigger: "Planning cycle start · Jun 6, 2026",
       dataSignals: ["SKU behavior analysis", "Merchant intent signals", "History depth scoring", "Store absorption data", "Supply constraint flags"],
@@ -476,7 +393,7 @@ const SYSTEM_ACTIONS = [
     drawer: {
       title: "Detected Seasonal / Event under-forecast bias",
       status: "critical" as StatusLevel,
-      explanation: "The system detected a persistent -4.8% forecast bias in Seasonal / Event SKU families, comparing rolling actuals against current plan. The bias was linked to downstream allocation shortfalls at 214 stores and an estimated $3.4M in protected value if the uplift is approved before Jun 10.",
+      explanation: "The system detected a persistent -4.8% forecast bias in Seasonal / Event SKU families, comparing rolling actuals against current plan. The bias was linked to downstream allocation shortfalls at 214 stores and an estimated $3.4M in protected value if the uplift is approved before June 30.",
       sourceTabs: ["Demand Planning", "SKU Strategy Segmentation"],
       primarySourceTabId: "demand",
       metrics: [
@@ -486,7 +403,7 @@ const SYSTEM_ACTIONS = [
         { label: "Approval required", value: "Yes — uplift requires planner sign-off" },
       ],
       businessImpact: "Under-forecast bias in Seasonal / Event creates late-cycle allocation pressure with a narrowing recovery window before the selling period.",
-      recommendedAction: "Approve the Seasonal / Event forecast uplift in the Demand Planning module before Jun 10.",
+      recommendedAction: "Approve the Seasonal / Event forecast uplift in the Demand Planning module before June 30.",
       trigger: "Rolling bias detection · Jun 7 · 6:14 AM",
       dataSignals: ["Rolling actual vs plan comparison", "Seasonal velocity acceleration", "Segment bias pattern", "Downstream allocation impact model"],
       whyNoApproval: "Bias detection is autonomous. The uplift recommendation was created but not applied — it requires planner approval before the allocation lock.",
@@ -503,7 +420,7 @@ const SYSTEM_ACTIONS = [
     drawer: {
       title: "Ranked store clusters by absorption capacity",
       status: "stable" as StatusLevel,
-      explanation: "The system scored all stores in the Seasonal / Event allocation pool by absorption capacity — combining sales velocity, backroom capacity, display readiness, and inbound timing. High-risk stores were ranked for protected push allocation before the Jun 10 lock.",
+      explanation: "The system scored all stores in the Seasonal / Event allocation pool by absorption capacity — combining sales velocity, backroom capacity, display readiness, and inbound timing. High-risk stores were ranked for protected push allocation before the June 30 lock.",
       sourceTabs: ["Inventory & Allocation", "Demand Planning"],
       primarySourceTabId: "inventory",
       metrics: [
@@ -575,7 +492,7 @@ const SYSTEM_ACTIONS = [
   },
 ]
 
-// ─── Module strip data ────────────────────────────────────────────────────────
+// ─── Module strip ─────────────────────────────────────────────────────────────
 
 const MODULE_STRIP = [
   { id: "sku-segmentation", label: "SKU Strategy",      status: "stable",    metric: "2,180 SKU families segmented", tabId: "sku-segmentation" },
@@ -599,11 +516,13 @@ function ECTDetailDrawer({
   payload,
   onClose,
   onGoToTab,
+  onApprove,
 }: {
   open: boolean
   payload: DrawerPayload | null
   onClose: () => void
   onGoToTab: (tabId: string) => void
+  onApprove?: () => void
 }) {
   if (!open || !payload) return null
   const badge = DRAWER_STATUS_CFG[payload.status] ?? DRAWER_STATUS_CFG.stable
@@ -612,7 +531,6 @@ function ECTDetailDrawer({
     <>
       <div className="fixed inset-0 bg-foreground/10 z-40" onClick={onClose} />
       <aside className="fixed right-0 top-0 h-full w-[440px] bg-card border-l border-border z-50 flex flex-col shadow-xl overflow-hidden">
-        {/* Header */}
         <div className="flex items-start justify-between gap-3 px-6 py-5 border-b border-border shrink-0">
           <div className="flex-1 min-w-0">
             <span className={cn("inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide mb-1.5", badge.classes)}>
@@ -629,7 +547,6 @@ function ECTDetailDrawer({
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           <div>
             <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">What this means</p>
@@ -700,7 +617,7 @@ function ECTDetailDrawer({
 
           {payload.relatedNodes && payload.relatedNodes.length > 0 && (
             <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Related nodes in value chain</p>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Related value chain nodes</p>
               <div className="flex flex-wrap gap-1.5">
                 {payload.relatedNodes.map((n) => (
                   <span key={n} className="text-[11px] bg-muted text-muted-foreground px-2 py-0.5 rounded-md border border-border font-medium">{n}</span>
@@ -726,13 +643,20 @@ function ECTDetailDrawer({
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-border space-y-2 shrink-0">
+          {onApprove && (
+            <button
+              onClick={() => { onApprove(); onClose() }}
+              className="w-full flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+            </button>
+          )}
           <div className="flex gap-2.5">
             {payload.primarySourceTabId && (
               <button
                 onClick={() => { onGoToTab(payload.primarySourceTabId); onClose() }}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-xs font-semibold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity"
+                className="flex-1 flex items-center justify-center gap-1.5 border border-border bg-card text-foreground text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-muted transition-colors"
               >
                 Open {payload.openModule ?? "module"} <ArrowRight className="w-3.5 h-3.5" />
               </button>
@@ -750,6 +674,51 @@ function ECTDetailDrawer({
   )
 }
 
+// ─── Decision engine SVG visual ───────────────────────────────────────────────
+
+function DecisionEngineVisual() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center select-none pointer-events-none" aria-hidden="true">
+      {/* Outer pulsing rings */}
+      <span className="absolute w-48 h-48 rounded-full border border-primary/10 animate-ping" style={{ animationDuration: "3s" }} />
+      <span className="absolute w-36 h-36 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "0.4s" }} />
+      {/* Static rings */}
+      <span className="absolute w-52 h-52 rounded-full border border-primary/8" />
+      <span className="absolute w-40 h-40 rounded-full border border-primary/12" />
+      <span className="absolute w-28 h-28 rounded-full border border-primary/18" />
+      {/* Center node */}
+      <div className="relative z-10 w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center shadow-lg">
+        <Cpu className="w-7 h-7 text-primary" />
+      </div>
+      {/* Satellite nodes */}
+      {[
+        { angle: -90,  icon: BarChart2, label: "Demand",    color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
+        { angle: -18,  icon: Package,   label: "Inventory", color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
+        { angle: 54,   icon: Truck,     label: "Supplier",  color: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/25" },
+        { angle: 126,  icon: Warehouse, label: "DC",        color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
+        { angle: 198,  icon: Store,     label: "Store",     color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
+      ].map(({ angle, icon: Icon, label, color, bg, border }) => {
+        const rad = (angle * Math.PI) / 180
+        const r = 88
+        const x = 50 + (r / 1.6) * Math.cos(rad)
+        const y = 50 + (r / 1.6) * Math.sin(rad)
+        return (
+          <div
+            key={label}
+            className={cn("absolute flex flex-col items-center gap-0.5 z-10")}
+            style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}
+          >
+            <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm", bg, border)}>
+              <Icon className={cn("w-4 h-4", color)} />
+            </div>
+            <span className="text-[8px] font-semibold text-muted-foreground whitespace-nowrap">{label}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface ExecControlTowerPageProps {
@@ -759,19 +728,22 @@ interface ExecControlTowerPageProps {
 export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPageProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerPayload, setDrawerPayload] = useState<DrawerPayload | null>(null)
+  const [drawerApproveId, setDrawerApproveId] = useState<string | null>(null)
   const [approvalStatuses, setApprovalStatuses] = useState<Record<string, "pending" | "approved">>({})
   const [selectedDecision, setSelectedDecision] = useState<string | null>(null)
 
   const decisionsRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<HTMLDivElement>(null)
 
-  function openDrawer(payload: DrawerPayload) {
+  function openDrawer(payload: DrawerPayload, approveId?: string) {
     setDrawerPayload(payload)
+    setDrawerApproveId(approveId ?? null)
     setDrawerOpen(true)
   }
   function closeDrawer() {
     setDrawerOpen(false)
     setDrawerPayload(null)
+    setDrawerApproveId(null)
   }
   function handleGoToTab(tabId: string) {
     closeDrawer()
@@ -783,6 +755,9 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
   function scrollToMap() {
     mapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
+  function approve(id: string) {
+    setApprovalStatuses(s => ({ ...s, [id]: "approved" }))
+  }
 
   const approvedCount = Object.values(approvalStatuses).filter(v => v === "approved").length
   const approvedValue = [3.4, 1.8, 1.6, 1.2, 0.7]
@@ -792,79 +767,134 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
   return (
     <div className="min-h-screen bg-background">
 
-      {/* ── SECTION 1: HERO ─────────────────────────────────────────────────── */}
-      <section className="border-b border-border bg-card">
-        <div className="px-8 py-7">
-          {/* Badge + title */}
-          <div className="flex items-center gap-2.5 mb-3">
-            <span className="text-[10px] font-semibold text-primary bg-accent border border-primary/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
-              Executive View
-            </span>
-          </div>
-          <h1 className="text-[26px] font-bold text-foreground tracking-tight leading-none mb-2 text-balance">
-            Executive Decision Engine
-          </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl mb-1.5">
-            From SKU strategy to shelf availability: identify where value is at risk, recommend the next best actions, and route high-impact tradeoffs for approval.
-          </p>
-          <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl mb-6">
-            {"Dollar Tree's decision engine connects SKU strategy segmentation, demand signals, inventory position, supplier risk, DC capacity, transportation performance, and store execution readiness into one action-oriented planning view."}
-          </p>
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 1 — PREMIUM HERO
+      ══════════════════════════════════════════════════════════════════════ */}
+      <section className="border-b border-border bg-card overflow-hidden">
+        <div className="px-8 py-8">
+          <div className="flex items-stretch gap-8">
 
-          {/* Impact statement + metrics */}
-          <div className="rounded-2xl border border-border bg-background px-6 py-5 mb-5">
-            <div className="flex items-start gap-8">
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-[var(--status-critical)] mb-1 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                  5 priority decisions can protect an estimated $8.7M before the Jun 10 allocation lock.
-                </p>
-                <p className="text-[11px] text-muted-foreground">
+            {/* Left: content */}
+            <div className="flex-1 min-w-0 flex flex-col">
+              {/* Badge + title */}
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="text-[10px] font-semibold text-primary bg-accent border border-primary/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
+                  Executive View
+                </span>
+                <span className="w-1 h-1 rounded-full bg-border" />
+                <span className="text-[10px] text-muted-foreground font-medium">Last refresh: Jun 7, 2026 · 8:30 AM</span>
+              </div>
+
+              <h1 className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-3 text-balance">
+                Executive Decision Engine
+              </h1>
+              <p className="text-[15px] font-semibold text-foreground leading-snug mb-1 text-balance max-w-xl">
+                5 decisions to protect $8.7M before the June 30 decision lock.
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mb-5">
+                From SKU strategy to shelf availability, the engine identifies risk, ranks next-best actions, and routes high-impact tradeoffs for approval.
+              </p>
+
+              {/* Capability pillars */}
+              <div className="flex gap-3 mb-6">
+                {[
+                  { label: "Detect",  icon: Activity,      text: "Finds where risk is building across demand, inventory, inbound flow, network capacity, and store execution." },
+                  { label: "Decide",  icon: Zap,           text: "Ranks the highest-value actions by urgency, value protected, and operational dependency." },
+                  { label: "Execute", icon: CheckCircle2,  text: "Routes automated system actions within guardrails and sends high-impact tradeoffs to human approval." },
+                ].map(({ label, icon: Icon, text }) => (
+                  <div
+                    key={label}
+                    className="flex-1 rounded-xl border border-border bg-background px-3.5 py-3 hover:border-primary/30 hover:bg-accent transition-all cursor-default"
+                  >
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Icon className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span className="text-[11px] font-bold text-foreground uppercase tracking-wide">{label}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground leading-snug">{text}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Value-at-risk ribbon */}
+              <div className="rounded-2xl border border-border bg-background px-5 py-4 mb-4">
+                {/* Deadline pill */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-critical)] bg-[var(--status-critical-bg)] border border-[var(--status-critical)]/20 px-2.5 py-1 rounded-full">
+                    <Clock className="w-3 h-3" />
+                    Decision lock · June 30 · 5:00 PM
+                  </span>
+                  {approvedCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-stable)] bg-[var(--status-stable-bg)] border border-[var(--status-stable)]/20 px-2.5 py-1 rounded-full ml-auto">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {approvedCount} approved · ${approvedValue.toFixed(1)}M protected
+                    </span>
+                  )}
+                </div>
+
+                {/* Ribbon flow */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Exposure */}
+                  <div className="rounded-xl border border-[var(--status-critical)]/25 bg-[var(--status-critical-bg)] px-4 py-2.5 text-center min-w-[120px]">
+                    <p className="text-[17px] font-bold text-[var(--status-critical)] leading-none">$18.1M</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">total exposure</p>
+                  </div>
+
+                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+
+                  {/* Decisions */}
+                  <div className="rounded-xl border border-border bg-muted px-4 py-2.5 text-center min-w-[110px]">
+                    <p className="text-[17px] font-bold text-foreground leading-none">5</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">priority decisions</p>
+                  </div>
+
+                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+
+                  {/* Value protected — hero number */}
+                  <div className="rounded-xl border border-[var(--status-stable)]/25 bg-[var(--status-stable-bg)] px-5 py-2.5 text-center min-w-[130px]">
+                    <p className="text-[26px] font-bold text-[var(--status-stable)] leading-none">$8.7M</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">estimated protected</p>
+                  </div>
+
+                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+
+                  {/* Stores reduction */}
+                  <div className="rounded-xl border border-[var(--status-watchlist)]/25 bg-[var(--status-watchlist-bg)] px-4 py-2.5 text-center min-w-[130px]">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <p className="text-[17px] font-bold text-muted-foreground leading-none">286</p>
+                      <ArrowRight className="w-3 h-3 text-[var(--status-stable)] shrink-0" />
+                      <p className="text-[17px] font-bold text-[var(--status-stable)] leading-none">146</p>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">stores at risk</p>
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-muted-foreground mt-3 italic">
                   All figures are directional estimates. Value protected is conditional on approval before the decision lock.
                 </p>
               </div>
-              {approvedCount > 0 && (
-                <div className="shrink-0 rounded-xl border border-[var(--status-stable)]/30 bg-[var(--status-stable-bg)] px-4 py-3 text-right">
-                  <p className="text-[11px] text-[var(--status-stable)] font-medium mb-0.5">{approvedCount} decision{approvedCount > 1 ? "s" : ""} approved</p>
-                  <p className="text-[18px] font-bold text-[var(--status-stable)]">${approvedValue.toFixed(1)}M protected</p>
-                </div>
-              )}
+
+              {/* CTAs */}
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={scrollToDecisions}
+                  className="flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+                >
+                  Review Priority Decisions <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={scrollToMap}
+                  className="flex items-center gap-2 border border-border text-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-muted transition-colors"
+                >
+                  View Decision Map
+                </button>
+              </div>
             </div>
 
-            {/* 4 impact metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
-              {[
-                { label: "Total revenue at risk", value: "$18.1M", status: "critical" },
-                { label: "Estimated value protected", value: "$8.7M", status: "stable" },
-                { label: "Stores at risk", value: "286 → 146", status: "watchlist" },
-                { label: "Decision lock", value: "Jun 10 · 5:00 PM", status: "critical" },
-              ].map((m) => (
-                <div key={m.label} className="rounded-xl border border-border bg-card px-4 py-3">
-                  <StatusDot status={m.status} />
-                  <p className="text-[17px] font-bold text-foreground mt-1.5 leading-none">{m.value}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{m.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA buttons */}
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={scrollToDecisions}
-              className="flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
-            >
-              Review Priority Decisions <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={scrollToMap}
-              className="flex items-center gap-2 border border-border text-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-muted transition-colors"
-            >
-              View Decision Map
-            </button>
-            <div className="ml-auto text-right shrink-0">
-              <p className="text-[10px] text-muted-foreground">Last refresh</p>
-              <p className="text-xs font-semibold text-foreground">Jun 7, 2026 · 8:30 AM</p>
+            {/* Right: decision engine visual */}
+            <div className="hidden lg:flex items-center justify-center w-[260px] shrink-0 relative">
+              <div className="w-[220px] h-[220px]">
+                <DecisionEngineVisual />
+              </div>
             </div>
           </div>
         </div>
@@ -872,130 +902,13 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
 
       <div className="px-8 py-7 space-y-10 max-w-[1600px]">
 
-        {/* ── SECTION 2: VALUE CHAIN DECISION MAP ─────────────────────────── */}
-        <section ref={mapRef}>
-          <div className="mb-4">
-            <h2 className="text-[15px] font-bold text-foreground tracking-tight mb-0.5">Value Chain Decision Map</h2>
-            <p className="text-xs text-muted-foreground">Where risk is entering the chain, where it moves next, and which decision protects value.</p>
-          </div>
-
-          {/* Risk path callout */}
-          <div className="rounded-xl border border-[var(--status-critical)]/20 bg-[var(--status-critical-bg)] px-4 py-2.5 mb-4 flex items-start gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-[var(--status-critical)] shrink-0 mt-0.5" />
-            <p className="text-[11px] text-foreground leading-snug">
-              <span className="font-semibold">Primary risk path:</span>{" "}
-              Seasonal / Event demand → constrained allocation → delayed Savannah inbound → DC pressure → store backroom aging.
-            </p>
-          </div>
-
-          {/* Horizontal node chain */}
-          <div className="rounded-2xl border border-border bg-card px-5 py-6 overflow-x-auto">
-            <div className="flex items-stretch gap-0 min-w-max">
-              {CHAIN_NODES.map((node, i) => {
-                const Icon = node.icon
-                const isRisk = RISK_PATH_IDS.has(node.id)
-                const cfg = STATUS_CFG[node.status]
-                const isConnectorRisk = i < CHAIN_NODES.length - 1 && RISK_PATH_IDS.has(node.id) && RISK_PATH_IDS.has(CHAIN_NODES[i + 1].id)
-                return (
-                  <div key={node.id} className="flex items-stretch shrink-0">
-                    {/* Node card */}
-                    <button
-                      onClick={() => openDrawer(node.drawer)}
-                      className={cn(
-                        "group flex flex-col items-start rounded-2xl border px-4 py-4 text-left transition-all w-[148px] shrink-0 hover:shadow-md",
-                        node.status === "critical"
-                          ? "border-[var(--status-critical)]/30 bg-[var(--status-critical-bg)]/40 hover:border-[var(--status-critical)]/50"
-                          : node.status === "watchlist"
-                          ? "border-[var(--status-watchlist)]/30 bg-[var(--status-watchlist-bg)]/30 hover:border-[var(--status-watchlist)]/50"
-                          : "border-border bg-background hover:border-primary/30"
-                      )}
-                    >
-                      {/* Icon + status */}
-                      <div className="flex items-center justify-between w-full mb-3">
-                        <div className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                          node.status === "critical" ? "bg-[var(--status-critical)]/15" :
-                          node.status === "watchlist" ? "bg-[var(--status-watchlist)]/15" : "bg-muted"
-                        )}>
-                          <Icon className={cn(
-                            "w-3.5 h-3.5",
-                            node.status === "critical" ? "text-[var(--status-critical)]" :
-                            node.status === "watchlist" ? "text-[var(--status-watchlist)]" : "text-[var(--status-stable)]"
-                          )} />
-                        </div>
-                        {isRisk && node.status === "critical" && (
-                          <span className="w-2 h-2 rounded-full bg-[var(--status-critical)] ring-2 ring-[var(--status-critical-bg)] animate-pulse shrink-0" />
-                        )}
-                      </div>
-
-                      {/* Name */}
-                      <p className="text-[11px] font-bold text-foreground mb-1 leading-snug">{node.name}</p>
-
-                      {/* Signal */}
-                      <p className="text-[10px] text-muted-foreground leading-snug mb-2.5 flex-1">{node.signal}</p>
-
-                      {/* Value tag */}
-                      <div className={cn(
-                        "text-[10px] font-semibold px-2 py-0.5 rounded-md border mb-2 self-start",
-                        node.status === "critical"
-                          ? "bg-[var(--status-critical-bg)] text-[var(--status-critical)] border-[var(--status-critical)]/20"
-                          : node.status === "watchlist"
-                          ? "bg-[var(--status-watchlist-bg)] text-[var(--status-watchlist)] border-[var(--status-watchlist)]/20"
-                          : "bg-[var(--status-stable-bg)] text-[var(--status-stable)] border-[var(--status-stable)]/20"
-                      )}>
-                        {node.valueTag}
-                      </div>
-
-                      {/* Decision link */}
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-primary group-hover:underline mt-auto">
-                        <span>{node.decisionLink}</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </div>
-                    </button>
-
-                    {/* Connector arrow */}
-                    {i < CHAIN_NODES.length - 1 && (
-                      <div className={cn(
-                        "flex items-center px-1.5 shrink-0",
-                        isConnectorRisk ? "text-[var(--status-critical)]/60" : "text-muted-foreground/30"
-                      )}>
-                        <ArrowRight className={cn(
-                          "w-3.5 h-3.5",
-                          isConnectorRisk && "stroke-[2.5]"
-                        )} />
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border flex-wrap">
-              {[
-                { status: "critical",  label: "Critical — active risk" },
-                { status: "watchlist", label: "Watchlist — monitored" },
-                { status: "stable",    label: "Stable — on track" },
-              ].map(l => (
-                <div key={l.status} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <StatusDot status={l.status} />
-                  {l.label}
-                </div>
-              ))}
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                <span className="w-2 h-2 rounded-full bg-[var(--status-critical)] animate-pulse shrink-0" />
-                Active risk path node
-              </div>
-              <p className="ml-auto text-[10px] text-muted-foreground italic">Click any node for detail and decision options</p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── SECTION 3: PRIORITY DECISIONS ───────────────────────────────── */}
+        {/* ══════════════════════════════════════════════════════════════════
+            SECTION 2 — PRIORITY DECISION STACK
+        ══════════════════════════════════════════════════════════════════ */}
         <section ref={decisionsRef}>
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
-              <h2 className="text-[15px] font-bold text-foreground tracking-tight mb-0.5">Priority Decisions</h2>
+              <h2 className="text-[15px] font-bold text-foreground tracking-tight mb-0.5">Priority Decision Stack</h2>
               <p className="text-xs text-muted-foreground">Ranked by value protected, urgency, and dependency across the value chain.</p>
             </div>
             {approvedCount > 0 && (
@@ -1061,13 +974,17 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                           ? <span className="text-[11px] font-semibold text-[var(--status-stable)] bg-[var(--status-stable-bg)] border border-[var(--status-stable)]/20 px-2 py-0.5 rounded-md">Approved</span>
                           : <span className={cn(
                               "text-[11px] font-semibold px-2 py-0.5 rounded-md border",
-                              dec.rank <= 3
+                              dec.rank <= 4
                                 ? "text-[var(--status-critical)] bg-[var(--status-critical-bg)] border-[var(--status-critical)]/20"
                                 : "text-[var(--status-watchlist)] bg-[var(--status-watchlist-bg)] border-[var(--status-watchlist)]/20"
                             )}>
-                              {dec.rank <= 3 ? "Pending Approval" : dec.rank === 5 ? "Needs Review" : "Pending Approval"}
+                              {dec.rank <= 4 ? "Pending Approval" : "Needs Review"}
                             </span>
                         }
+                        {/* Dependency tag */}
+                        <span className="text-[10px] font-semibold text-primary bg-accent border border-primary/15 px-1.5 py-0.5 rounded font-mono">
+                          {dec.dependencyTag}
+                        </span>
                         <span className="text-[10px] text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded font-medium">
                           {dec.segment}
                         </span>
@@ -1093,7 +1010,7 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                         </span>
                       </div>
 
-                      {/* Why approval needed — shown when expanded */}
+                      {/* Expanded rationale */}
                       {isSelected && !isApproved && (
                         <div className="mt-3 pt-3 border-t border-border">
                           <p className="text-[11px] font-semibold text-muted-foreground mb-1">Why approval is needed</p>
@@ -1124,13 +1041,13 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                       ) : (
                         <>
                           <button
-                            onClick={() => setApprovalStatuses(s => ({ ...s, [dec.id]: "approved" }))}
+                            onClick={() => approve(dec.id)}
                             className="text-[11px] font-semibold text-primary-foreground bg-primary px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
                           >
                             {dec.primaryLabel}
                           </button>
                           <button
-                            onClick={() => openDrawer(decDrawer)}
+                            onClick={() => openDrawer(decDrawer, dec.id)}
                             className="text-[11px] font-medium text-muted-foreground border border-border px-3 py-1.5 rounded-lg hover:bg-muted transition-colors whitespace-nowrap"
                           >
                             {dec.secondaryLabel}
@@ -1151,15 +1068,147 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
           </div>
         </section>
 
-        {/* ── SECTION 4: SYSTEM ACTIONS COMPLETED ─────────────────────────── */}
+        {/* ══════════════════════════════════════════════════════════════════
+            SECTION 3 — VALUE CHAIN DECISION MAP
+        ══════════════════════════════════════════════════════════════════ */}
+        <section ref={mapRef}>
+          <div className="mb-4">
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-[15px] font-bold text-foreground tracking-tight">Value Chain Decision Map</h2>
+              <button
+                onClick={() => onGoToTab("sku-segmentation")}
+                className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-accent border border-primary/15 px-2 py-0.5 rounded-full hover:border-primary/40 transition-colors"
+              >
+                <Layers className="w-3 h-3" />
+                Powered by SKU Strategy Segmentation
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground">Where risk is entering the operating chain and which decision protects value.</p>
+          </div>
+
+          {/* Risk path callout */}
+          <div className="rounded-xl border border-[var(--status-critical)]/20 bg-[var(--status-critical-bg)] px-4 py-2.5 mb-4 flex items-start gap-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-[var(--status-critical)] shrink-0 mt-0.5" />
+            <p className="text-[11px] text-foreground leading-snug">
+              <span className="font-semibold">Primary risk path:</span>{" "}
+              Seasonal / Event demand is under-forecast, allocation pressure builds, inbound risk narrows recovery options, DC pressure delays movement, and store execution gaps prevent shelf availability.
+            </p>
+          </div>
+
+          {/* Horizontal node chain */}
+          <div className="rounded-2xl border border-border bg-card px-6 py-6 overflow-x-auto">
+            <div className="flex items-stretch gap-0 min-w-max">
+              {CHAIN_NODES.map((node, i) => {
+                const Icon = node.icon
+                const isRisk = RISK_PATH_IDS.has(node.id)
+                const isConnectorRisk = i < CHAIN_NODES.length - 1 && RISK_PATH_IDS.has(CHAIN_NODES[i + 1].id)
+                return (
+                  <div key={node.id} className="flex items-stretch shrink-0">
+                    {/* Node card — wider since only 5 */}
+                    <button
+                      onClick={() => openDrawer(node.drawer)}
+                      className={cn(
+                        "group flex flex-col items-start rounded-2xl border px-5 py-5 text-left transition-all w-[190px] shrink-0 hover:shadow-lg",
+                        node.status === "critical"
+                          ? "border-[var(--status-critical)]/30 bg-[var(--status-critical-bg)]/40 hover:border-[var(--status-critical)]/50"
+                          : node.status === "watchlist"
+                          ? "border-[var(--status-watchlist)]/30 bg-[var(--status-watchlist-bg)]/30 hover:border-[var(--status-watchlist)]/50"
+                          : "border-border bg-background hover:border-primary/30"
+                      )}
+                    >
+                      {/* Icon row */}
+                      <div className="flex items-center justify-between w-full mb-3.5">
+                        <div className={cn(
+                          "w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
+                          node.status === "critical"  ? "bg-[var(--status-critical)]/15" :
+                          node.status === "watchlist" ? "bg-[var(--status-watchlist)]/15" : "bg-muted"
+                        )}>
+                          <Icon className={cn(
+                            "w-4 h-4",
+                            node.status === "critical"  ? "text-[var(--status-critical)]" :
+                            node.status === "watchlist" ? "text-[var(--status-watchlist)]" : "text-[var(--status-stable)]"
+                          )} />
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <StatusBadge status={node.status} />
+                          {isRisk && node.status === "critical" && (
+                            <span className="w-2 h-2 rounded-full bg-[var(--status-critical)] ring-2 ring-[var(--status-critical-bg)] animate-pulse shrink-0" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Name */}
+                      <p className="text-[12px] font-bold text-foreground mb-1 leading-snug">{node.name}</p>
+
+                      {/* Primary issue */}
+                      <p className="text-[10px] text-muted-foreground leading-snug mb-3 flex-1">{node.primaryIssue}</p>
+
+                      {/* Signal */}
+                      <div className={cn(
+                        "text-[10px] font-semibold px-2 py-0.5 rounded-md border mb-2.5 self-start",
+                        node.status === "critical"
+                          ? "bg-[var(--status-critical-bg)] text-[var(--status-critical)] border-[var(--status-critical)]/20"
+                          : node.status === "watchlist"
+                          ? "bg-[var(--status-watchlist-bg)] text-[var(--status-watchlist)] border-[var(--status-watchlist)]/20"
+                          : "bg-[var(--status-stable-bg)] text-[var(--status-stable)] border-[var(--status-stable)]/20"
+                      )}>
+                        {node.signal}
+                      </div>
+
+                      {/* Value tag */}
+                      <p className="text-[10px] text-muted-foreground font-medium mb-3 leading-snug">{node.valueTag}</p>
+
+                      {/* Open link */}
+                      <div className="flex items-center gap-1 text-[10px] font-semibold text-primary group-hover:underline mt-auto">
+                        <span>{node.openLink}</span>
+                        <ChevronRight className="w-3 h-3" />
+                      </div>
+                    </button>
+
+                    {/* Connector arrow */}
+                    {i < CHAIN_NODES.length - 1 && (
+                      <div className={cn(
+                        "flex items-center px-2 shrink-0",
+                        isConnectorRisk ? "text-[var(--status-critical)]/60" : "text-muted-foreground/30"
+                      )}>
+                        <ArrowRight className={cn("w-4 h-4", isConnectorRisk && "stroke-[2.5]")} />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 mt-5 pt-4 border-t border-border flex-wrap">
+              {[
+                { status: "critical",  label: "Critical — active risk" },
+                { status: "watchlist", label: "Watchlist — monitored" },
+                { status: "stable",    label: "Stable — on track" },
+              ].map(l => (
+                <div key={l.status} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                  <StatusDot status={l.status} />
+                  {l.label}
+                </div>
+              ))}
+              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <span className="w-2 h-2 rounded-full bg-[var(--status-critical)] animate-pulse shrink-0" />
+                Active risk path node
+              </div>
+              <p className="ml-auto text-[10px] text-muted-foreground italic">Click any node for detail and decision options</p>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            SECTION 4 — SYSTEM ACTIONS COMPLETED
+        ══════════════════════════════════════════════════════════════════ */}
         <section>
-          <div className="flex items-center gap-2.5 mb-4">
+          <div className="flex items-center gap-2.5 mb-1">
             <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shrink-0">
               <Bot className="w-3 h-3 text-primary-foreground" />
             </div>
-            <div>
-              <h2 className="text-[15px] font-bold text-foreground tracking-tight leading-none">System Actions Completed</h2>
-            </div>
+            <h2 className="text-[15px] font-bold text-foreground tracking-tight leading-none">System Actions Completed</h2>
             <span className="text-[10px] font-semibold bg-primary/8 text-primary border border-primary/20 px-2 py-0.5 rounded-md uppercase tracking-widest ml-1">
               Agentic Workflow
             </span>
@@ -1175,17 +1224,13 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                   className="px-5 py-4 flex items-start gap-4 hover:bg-muted/40 transition-colors cursor-pointer group"
                   onClick={() => openDrawer(action.drawer)}
                 >
-                  {/* Status badge */}
                   <div className={cn(
                     "flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold shrink-0 mt-0.5 border",
                     isCompleted
                       ? "bg-[var(--status-stable-bg)] text-[var(--status-stable)] border-[var(--status-stable)]/20"
                       : "bg-[var(--status-watchlist-bg)] text-[var(--status-watchlist)] border-[var(--status-watchlist)]/20"
                   )}>
-                    {isCompleted
-                      ? <CheckCircle2 className="w-3.5 h-3.5" />
-                      : <Clock className="w-3.5 h-3.5" />
-                    }
+                    {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                     <span>{isCompleted ? "Completed" : "Watchlist"}</span>
                   </div>
 
@@ -1213,8 +1258,10 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
           </div>
         </section>
 
-        {/* ── SECTION 5: COMPACT OPERATING MODULE STRIP ───────────────────── */}
-        <section>
+        {/* ══════════════════════════════════════════════════════════════════
+            SECTION 5 — COMPACT OPERATING MODULE STRIP
+        ══════════════════════════════════════════════════════════════════ */}
+        <section className="pb-6">
           <div className="mb-4">
             <h2 className="text-[15px] font-bold text-foreground tracking-tight mb-0.5">Explore Operating Modules</h2>
             <p className="text-xs text-muted-foreground">Drill into the source modules behind each decision.</p>
@@ -1254,6 +1301,7 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
         payload={drawerPayload}
         onClose={closeDrawer}
         onGoToTab={handleGoToTab}
+        onApprove={drawerApproveId ? () => approve(drawerApproveId) : undefined}
       />
     </div>
   )
