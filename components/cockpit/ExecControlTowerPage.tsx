@@ -21,6 +21,7 @@ import {
   Bookmark,
   TrendingDown,
   Activity,
+  Cpu,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { StatusLevel } from "./ECTData"
@@ -731,6 +732,152 @@ const CAPABILITY_DRAWERS: Record<string, DrawerPayload> = {
   },
 }
 
+// ─── Orbit engine visual ─────────────────────────────────────────────────────
+
+const ENGINE_NODES = [
+  {
+    id: "sku-segmentation",
+    angle: -90,
+    icon: Layers,
+    label: "SKU Strategy",
+    status: "stable",
+    tooltip: "2,180 SKU families segmented",
+    tabId: "sku-segmentation",
+  },
+  {
+    id: "demand",
+    angle: -30,
+    icon: BarChart2,
+    label: "Demand",
+    status: "critical",
+    tooltip: "-4.8% forecast bias",
+    tabId: "demand",
+  },
+  {
+    id: "inventory",
+    angle: 30,
+    icon: Package,
+    label: "Inventory",
+    status: "critical",
+    tooltip: "214 stores exposed",
+    tabId: "inventory",
+  },
+  {
+    id: "store-execution",
+    angle: 90,
+    icon: Store,
+    label: "Store",
+    status: "behind",
+    tooltip: "$4.3M aged in backroom",
+    tabId: "store-execution",
+  },
+  {
+    id: "dc-capacity",
+    angle: 150,
+    icon: Warehouse,
+    label: "DC / Transport",
+    status: "critical",
+    tooltip: "3 DCs at capacity risk",
+    tabId: "dc-capacity",
+  },
+  {
+    id: "supplier-inbound",
+    angle: 210,
+    icon: Truck,
+    label: "Supplier",
+    status: "watchlist",
+    tooltip: "43 at-risk POs",
+    tabId: "supplier-inbound",
+  },
+] as const
+
+const NODE_STATUS_STYLE: Record<string, { iconCls: string; bg: string; border: string; pulse: boolean }> = {
+  critical:  { iconCls: "text-[var(--status-critical)]",  bg: "bg-[var(--status-critical-bg)]",  border: "border-[var(--status-critical)]/40",  pulse: true  },
+  watchlist: { iconCls: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/40", pulse: false },
+  behind:    { iconCls: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/40", pulse: false },
+  stable:    { iconCls: "text-[var(--status-stable)]",    bg: "bg-[var(--status-stable-bg)]",    border: "border-[var(--status-stable)]/40",    pulse: false },
+}
+
+function EngineOrbitVisual({ onNodeClick }: { onNodeClick: (drawer: DrawerPayload) => void }) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+
+  return (
+    <div className="relative w-[240px] h-[240px] select-none" aria-label="Decision Engine modules">
+      {/* Outer pulsing ring */}
+      <span className="absolute inset-0 m-auto w-[200px] h-[200px] rounded-full border border-primary/8 animate-ping pointer-events-none" style={{ animationDuration: "4s" }} />
+      {/* Static orbit rings */}
+      <span className="absolute inset-0 m-auto w-[200px] h-[200px] rounded-full border border-primary/10 pointer-events-none" />
+      <span className="absolute inset-0 m-auto w-[148px] h-[148px] rounded-full border border-primary/12 pointer-events-none" />
+      <span className="absolute inset-0 m-auto w-[96px] h-[96px] rounded-full border border-primary/18 pointer-events-none" />
+
+      {/* Center */}
+      <div className="absolute inset-0 m-auto w-[52px] h-[52px] rounded-2xl bg-primary/10 border border-primary/25 flex flex-col items-center justify-center gap-0.5 z-10 pointer-events-none shadow-sm">
+        <Cpu className="w-5 h-5 text-primary" />
+        <span className="text-[7px] font-bold text-primary uppercase tracking-wider leading-none">Engine</span>
+      </div>
+
+      {/* Orbit nodes */}
+      {ENGINE_NODES.map(({ id, angle, icon: Icon, label, status, tooltip }) => {
+        const rad = (angle * Math.PI) / 180
+        const r = 96
+        const cx = 120
+        const cy = 120
+        const x = cx + r * Math.cos(rad)
+        const y = cy + r * Math.sin(rad)
+        const s = NODE_STATUS_STYLE[status] ?? NODE_STATUS_STYLE.stable
+        const isHovered = hoveredId === id
+        const nodeDrawer = CHAIN_NODES.find(n => n.id === id)?.drawer
+
+        return (
+          <div
+            key={id}
+            className="absolute z-10"
+            style={{ left: x, top: y, transform: "translate(-50%, -50%)" }}
+          >
+            {/* Tooltip */}
+            {isHovered && (
+              <div
+                className="absolute z-20 bg-popover border border-border rounded-lg px-2.5 py-1.5 shadow-lg whitespace-nowrap pointer-events-none"
+                style={{
+                  bottom: "calc(100% + 6px)",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                }}
+              >
+                <p className="text-[10px] font-bold text-foreground">{label}</p>
+                <p className="text-[10px] text-muted-foreground">{tooltip}</p>
+              </div>
+            )}
+
+            <button
+              className={cn(
+                "flex flex-col items-center gap-0.5 group transition-transform duration-150",
+                isHovered ? "scale-125" : "scale-100"
+              )}
+              onMouseEnter={() => setHoveredId(id)}
+              onMouseLeave={() => setHoveredId(null)}
+              onClick={() => nodeDrawer && onNodeClick(nodeDrawer)}
+              aria-label={`${label}: ${tooltip}`}
+            >
+              <div className={cn(
+                "relative w-8 h-8 rounded-xl border-2 flex items-center justify-center shadow-sm transition-shadow duration-150",
+                s.bg, s.border,
+                isHovered && "shadow-md"
+              )}>
+                <Icon className={cn("w-3.5 h-3.5", s.iconCls)} />
+                {s.pulse && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--status-critical)] animate-pulse" />
+                )}
+              </div>
+              <span className="text-[8px] font-semibold text-muted-foreground whitespace-nowrap leading-none mt-0.5">{label}</span>
+            </button>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 interface ExecControlTowerPageProps {
   onGoToTab: (tabId: string) => void
 }
@@ -781,7 +928,7 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
           SECTION 1 — HERO
       ══════════════════════════════════════════════════════════════════════ */}
       <section className="border-b border-border bg-card">
-        <div className="px-8 py-8 max-w-[1600px]">
+        <div className="px-8 py-8">
 
           {/* Badge + refresh */}
           <div className="flex items-center gap-2.5 mb-3">
@@ -793,94 +940,59 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
           </div>
 
           {/* Title */}
-          <h1 className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-3">
+          <h1 className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-6">
             Executive Decision Engine
           </h1>
 
-          {/* Single punchy tagline */}
-          <p className="text-[15px] font-semibold text-foreground leading-snug mb-6 max-w-3xl text-balance">
-            Your executive layer for turning SKU strategy, supply chain signals, and store execution risk into approved actions before the June 30 decision lock.
-          </p>
+          {/* Top row: capability tiles LEFT + circle visual RIGHT */}
+          <div className="flex items-start gap-8 mb-6">
 
-          {/* ── Capability tiles ── */}
-          <div className="flex items-stretch gap-0 mb-6">
-            {(["detect", "decide", "execute"] as const).map((key, i) => {
-              const cfg = {
-                detect:  { label: "Detect",  icon: Activity,     copy: "Finds risk across demand, inventory, inbound flow, network capacity, and store execution." },
-                decide:  { label: "Decide",  icon: Zap,          copy: "Ranks actions by value protected, urgency, and operational dependency." },
-                execute: { label: "Execute", icon: CheckCircle2, copy: "Automates within guardrails and routes high-impact tradeoffs for approval." },
-              }[key]
-              const Icon = cfg.icon
-              return (
-                <div key={key} className="flex items-stretch">
-                  <button
-                    onClick={() => openDrawer(CAPABILITY_DRAWERS[key])}
-                    className="group flex flex-col items-start rounded-xl border border-border bg-background px-5 py-4 text-left hover:border-primary/40 hover:bg-accent hover:shadow-md transition-all w-[210px]"
-                  >
-                    <div className="flex items-center gap-2.5 mb-2.5">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <span className="text-[14px] font-extrabold text-foreground uppercase tracking-wide">{cfg.label}</span>
-                    </div>
-                    <p className="text-[12px] text-muted-foreground leading-snug group-hover:text-foreground transition-colors">{cfg.copy}</p>
-                  </button>
-                  {i < 2 && (
-                    <div className="flex items-center px-2.5 text-primary/30">
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          {/* ── Signal-to-action flow strip ── */}
-          <div className="mb-6">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2.5">Signal-to-action path</p>
-            <div className="flex items-center gap-0 flex-wrap">
-              {SIGNAL_FLOW_NODES.map((node, i) => {
-                const Icon = node.icon
-                const nodeDrawer = CHAIN_NODES.find(n => n.id === node.id)?.drawer
-                const sc = {
-                  critical:  { iconCls: "text-[var(--status-critical)]",  bg: "bg-[var(--status-critical-bg)]",  border: "border-[var(--status-critical)]/30",  sigCls: "text-[var(--status-critical)]"  },
-                  watchlist: { iconCls: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", sigCls: "text-[var(--status-watchlist)]" },
-                  behind:    { iconCls: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", sigCls: "text-[var(--status-watchlist)]" },
-                  stable:    { iconCls: "text-[var(--status-stable)]",    bg: "bg-[var(--status-stable-bg)]",    border: "border-[var(--status-stable)]/30",    sigCls: "text-[var(--status-stable)]"    },
-                }[node.status] ?? { iconCls: "text-muted-foreground", bg: "bg-muted", border: "border-border", sigCls: "text-muted-foreground" }
-
+            {/* Left: Detect / Decide / Execute tiles */}
+            <div className="flex items-stretch gap-0 flex-1">
+              {(["detect", "decide", "execute"] as const).map((key, i) => {
+                const cfg = {
+                  detect:  { label: "Detect",  icon: Activity,     copy: "Finds risk across demand, inventory, inbound flow, network capacity, and store execution." },
+                  decide:  { label: "Decide",  icon: Zap,          copy: "Ranks actions by value protected, urgency, and operational dependency." },
+                  execute: { label: "Execute", icon: CheckCircle2, copy: "Automates within guardrails and routes high-impact tradeoffs for approval." },
+                }[key]
+                const Icon = cfg.icon
                 return (
-                  <div key={node.id} className="flex items-center">
+                  <div key={key} className="flex items-stretch">
                     <button
-                      onClick={() => nodeDrawer && openDrawer(nodeDrawer)}
-                      className={cn(
-                        "group flex flex-col items-start rounded-xl border px-3.5 py-3 text-left transition-all hover:shadow-md w-[150px] shrink-0",
-                        sc.bg, sc.border
-                      )}
+                      onClick={() => openDrawer(CAPABILITY_DRAWERS[key])}
+                      className="group flex flex-col items-start rounded-xl border border-border bg-background px-5 py-5 text-left hover:border-primary/50 hover:bg-accent hover:shadow-lg transition-all w-[200px]"
                     >
-                      <div className="flex items-center gap-1.5 mb-1.5 w-full min-w-0">
-                        <Icon className={cn("w-3.5 h-3.5 shrink-0", sc.iconCls)} />
-                        <span className="text-[11px] font-bold text-foreground truncate flex-1">{node.label}</span>
-                        <StatusBadge status={node.status} className="shrink-0" />
+                      <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center mb-3 group-hover:bg-primary/15 group-hover:border-primary/30 group-hover:shadow-[0_0_12px_var(--primary)]/20 transition-all">
+                        <Icon className="w-6 h-6 text-primary" />
                       </div>
-                      <p className={cn("text-[11px] font-semibold leading-snug", sc.sigCls)}>{node.signal}</p>
+                      <span className="text-[15px] font-extrabold text-foreground uppercase tracking-wide mb-2">{cfg.label}</span>
+                      <p className="text-[12px] text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">{cfg.copy}</p>
                     </button>
-                    {i < SIGNAL_FLOW_NODES.length - 1 && (
-                      <div className="flex items-center px-1.5 text-muted-foreground/40 shrink-0">
-                        <ArrowRight className="w-3.5 h-3.5" />
+                    {i < 2 && (
+                      <div className="flex items-center px-3 text-primary/25 self-center">
+                        <ArrowRight className="w-4 h-4" />
                       </div>
                     )}
                   </div>
                 )
               })}
             </div>
+
+            {/* Right: circular engine visual */}
+            <div className="hidden lg:flex flex-col items-center gap-2 w-[260px] shrink-0">
+              <EngineOrbitVisual onNodeClick={(drawer) => openDrawer(drawer)} />
+              <p className="text-[10px] text-muted-foreground text-center leading-snug max-w-[220px]">
+                Segmentation-led planning across the operating chain
+              </p>
+            </div>
+
           </div>
 
-          {/* ── Decision opportunity strip ── */}
+          {/* ── Decision opportunity strip (full width) ── */}
           <div className="rounded-2xl border border-border bg-background px-5 py-4 mb-5">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Decision opportunity</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Decision Opportunity</p>
                 <p className="text-[14px] font-semibold text-foreground leading-snug">
                   5 priority decisions can protect an estimated{" "}
                   <span className="text-[var(--status-stable)] font-extrabold">$8.7M</span>{" "}
