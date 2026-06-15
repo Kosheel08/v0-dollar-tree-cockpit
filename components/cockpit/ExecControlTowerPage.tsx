@@ -53,6 +53,7 @@ const STATUS_CFG: Record<string, { label: string; dot: string; badge: string }> 
   critical:  { label: "Critical",   dot: "bg-[var(--status-critical)]",  badge: "bg-[var(--status-critical-bg)] text-[var(--status-critical)] border border-[var(--status-critical)]/25"  },
   watchlist: { label: "Watchlist",  dot: "bg-[var(--status-watchlist)]", badge: "bg-[var(--status-watchlist-bg)] text-[var(--status-watchlist)] border border-[var(--status-watchlist)]/25" },
   stable:    { label: "Stable",     dot: "bg-[var(--status-stable)]",    badge: "bg-[var(--status-stable-bg)] text-[var(--status-stable)] border border-[var(--status-stable)]/25"          },
+  behind:    { label: "Behind",     dot: "bg-[var(--status-watchlist)]", badge: "bg-[var(--status-watchlist-bg)] text-[var(--status-watchlist)] border border-[var(--status-watchlist)]/25" },
 }
 
 function StatusDot({ status, size = "md" }: { status: string; size?: "sm" | "md" }) {
@@ -210,7 +211,7 @@ const CHAIN_NODES = [
   {
     id: "store-execution",
     name: "Store Execution",
-    status: "critical",
+    status: "behind",
     signal: "$4.3M aged in backroom",
     valueTag: "$1.8M field action",
     primaryIssue: "Backroom and display execution gaps",
@@ -674,52 +675,216 @@ function ECTDetailDrawer({
   )
 }
 
-// ─── Decision engine SVG visual ───────────────────────────────────────────────
+// ─── Orbit node preview data ──────────────────────────────────────────────────
 
-function DecisionEngineVisual() {
+const ORBIT_NODES = [
+  {
+    id: "demand",
+    angle: -90,
+    icon: BarChart2,
+    label: "Demand",
+    status: "critical",
+    tabId: "demand",
+    decisionIdx: 0, // pd-1
+    preview: {
+      title: "Demand signal",
+      signal: "-4.8% forecast bias",
+      insight: "Seasonal / Event demand is under-forecast.",
+      decision: "Forecast uplift + protected allocation",
+      value: "$3.4M estimated",
+    },
+  },
+  {
+    id: "inventory",
+    angle: -18,
+    icon: Package,
+    label: "Inventory",
+    status: "critical",
+    tabId: "inventory",
+    decisionIdx: 0, // also pd-1
+    preview: {
+      title: "Inventory signal",
+      signal: "214 stores exposed",
+      insight: "Inventory exists, but allocation readiness is constrained.",
+      decision: "Protected push allocation",
+      value: "Included in $3.4M decision",
+    },
+  },
+  {
+    id: "supplier-inbound",
+    angle: 54,
+    icon: Truck,
+    label: "Supplier",
+    status: "watchlist",
+    tabId: "supplier-inbound",
+    decisionIdx: 2, // pd-3
+    preview: {
+      title: "Supplier signal",
+      signal: "43 at-risk POs",
+      insight: "Delayed and short-shipped POs narrow recovery options.",
+      decision: "Expedite delayed Seasonal PO",
+      value: "$1.6M estimated",
+    },
+  },
+  {
+    id: "dc-capacity",
+    angle: 126,
+    icon: Warehouse,
+    label: "DC / Transport",
+    status: "critical",
+    tabId: "dc-capacity",
+    decisionIdx: 3, // pd-4
+    preview: {
+      title: "Network signal",
+      signal: "3 DCs at capacity risk",
+      insight: "Savannah and Joliet pressure may delay priority flow.",
+      decision: "Re-sequence outbound waves",
+      value: "$1.2M estimated",
+    },
+  },
+  {
+    id: "store-execution",
+    angle: 198,
+    icon: Store,
+    label: "Store",
+    status: "behind",
+    tabId: "store-execution",
+    decisionIdx: 1, // pd-2
+    preview: {
+      title: "Store signal",
+      signal: "$4.3M aged in backroom",
+      insight: "Delivered inventory is not converting to shelf availability fast enough.",
+      decision: "Clear backroom aging and display backlog",
+      value: "$1.8M estimated",
+    },
+  },
+]
+
+// ─── Status config extended for "behind" ─────────────────────────────────────
+
+const STATUS_CFG_EXT: Record<string, { color: string; bg: string; border: string; ring: string }> = {
+  critical:  { color: "text-[var(--status-critical)]",  bg: "bg-[var(--status-critical-bg)]",  border: "border-[var(--status-critical)]/30",  ring: "ring-[var(--status-critical)]/40"  },
+  watchlist: { color: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", ring: "ring-[var(--status-watchlist)]/40" },
+  stable:    { color: "text-[var(--status-stable)]",    bg: "bg-[var(--status-stable-bg)]",    border: "border-[var(--status-stable)]/30",    ring: "ring-[var(--status-stable)]/40"    },
+  behind:    { color: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", ring: "ring-[var(--status-watchlist)]/40" },
+}
+
+// ─── Capability pillar drawer payloads ───────────────────────────────────────
+
+const CAPABILITY_DRAWERS: Record<string, DrawerPayload> = {
+  detect: {
+    title: "Detect",
+    status: "stable",
+    explanation: "Detect combines signals from demand plans, inventory position, supplier and PO status, DC capacity, transportation performance, and store execution readiness to find where risk is building.",
+    sourceTabs: ["Demand Planning", "Inventory & Allocation", "Supplier & Inbound Flow", "DC Capacity & Transportation", "Store Execution"],
+    primarySourceTabId: "demand",
+    metrics: [
+      { label: "Signal sources", value: "6 operating modules" },
+      { label: "SKU families analyzed", value: "2,180" },
+      { label: "At-risk signals active", value: "5" },
+    ],
+    businessImpact: "Early risk detection across the full value chain narrows the window between signal and action, giving planners time to intervene before risk compounds.",
+    recommendedAction: "Review the Priority Decision Stack to see ranked actions from detected risk.",
+  },
+  decide: {
+    title: "Decide",
+    status: "stable",
+    explanation: "Decide ranks recommended actions based on estimated value protected, urgency, store exposure, and dependencies across the operating chain.",
+    sourceTabs: ["All operating modules"],
+    primarySourceTabId: "demand",
+    metrics: [
+      { label: "Priority decisions ranked", value: "5" },
+      { label: "Total value at stake", value: "$18.1M" },
+      { label: "Estimated value protected", value: "$8.7M (if all approved)" },
+    ],
+    businessImpact: "Ranking decisions by value, urgency, and dependency gives planners a clear starting point for limited approval bandwidth before the June 30 lock.",
+    recommendedAction: "Review the Priority Decision Stack below to approve ranked actions.",
+  },
+  execute: {
+    title: "Execute",
+    status: "stable",
+    explanation: "Execute completes low-risk system actions within guardrails and sends high-impact tradeoffs to human approval, including forecast changes, constrained allocations, expedite costs, and field labor priorities.",
+    sourceTabs: ["All operating modules"],
+    primarySourceTabId: "sku-segmentation",
+    metrics: [
+      { label: "System actions completed", value: "5" },
+      { label: "Decisions routed for approval", value: "5" },
+      { label: "Within guardrail threshold", value: "Yes" },
+    ],
+    businessImpact: "Automating within-guardrail actions reduces planning overhead while ensuring high-impact tradeoffs always reach a human decision-maker.",
+    recommendedAction: "Review System Actions Completed below to see what was automated.",
+  },
+}
+
+// ─── Decision engine visual (interactive) ────────────────────────────────────
+
+function DecisionEngineVisual({
+  activeNode,
+  onNodeClick,
+}: {
+  activeNode: string | null
+  onNodeClick: (id: string) => void
+}) {
   return (
-    <div className="relative w-full h-full flex items-center justify-center select-none pointer-events-none" aria-hidden="true">
-      {/* Outer pulsing rings */}
-      <span className="absolute w-48 h-48 rounded-full border border-primary/10 animate-ping" style={{ animationDuration: "3s" }} />
-      <span className="absolute w-36 h-36 rounded-full border border-primary/15 animate-ping" style={{ animationDuration: "2.2s", animationDelay: "0.4s" }} />
-      {/* Static rings */}
-      <span className="absolute w-52 h-52 rounded-full border border-primary/8" />
-      <span className="absolute w-40 h-40 rounded-full border border-primary/12" />
-      <span className="absolute w-28 h-28 rounded-full border border-primary/18" />
+    <div className="relative w-full h-full flex items-center justify-center select-none" aria-label="Decision engine signal diagram">
+      {/* Pulsing rings */}
+      <span className="absolute w-48 h-48 rounded-full border border-primary/10 animate-ping pointer-events-none" style={{ animationDuration: "3s" }} />
+      <span className="absolute w-36 h-36 rounded-full border border-primary/15 animate-ping pointer-events-none" style={{ animationDuration: "2.2s", animationDelay: "0.4s" }} />
+      {/* Static orbit rings */}
+      <span className="absolute w-52 h-52 rounded-full border border-primary/8 pointer-events-none" />
+      <span className="absolute w-40 h-40 rounded-full border border-primary/12 pointer-events-none" />
+      <span className="absolute w-28 h-28 rounded-full border border-primary/18 pointer-events-none" />
+
       {/* Center node */}
-      <div className="relative z-10 w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center shadow-lg">
-        <Cpu className="w-7 h-7 text-primary" />
+      <div className="relative z-10 w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex flex-col items-center justify-center shadow-lg gap-0.5 pointer-events-none">
+        <Cpu className="w-6 h-6 text-primary" />
+        <span className="text-[7px] font-bold text-primary uppercase tracking-wide leading-none">Engine</span>
       </div>
-      {/* Satellite nodes */}
-      {[
-        { angle: -90,  icon: BarChart2, label: "Demand",    color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
-        { angle: -18,  icon: Package,   label: "Inventory", color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
-        { angle: 54,   icon: Truck,     label: "Supplier",  color: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/25" },
-        { angle: 126,  icon: Warehouse, label: "DC",        color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
-        { angle: 198,  icon: Store,     label: "Store",     color: "text-[var(--status-critical)]", bg: "bg-[var(--status-critical-bg)]", border: "border-[var(--status-critical)]/25" },
-      ].map(({ angle, icon: Icon, label, color, bg, border }) => {
+
+      {/* Orbit nodes */}
+      {ORBIT_NODES.map(({ id, angle, icon: Icon, label, status }) => {
         const rad = (angle * Math.PI) / 180
         const r = 88
         const x = 50 + (r / 1.6) * Math.cos(rad)
         const y = 50 + (r / 1.6) * Math.sin(rad)
+        const cfg = STATUS_CFG_EXT[status] ?? STATUS_CFG_EXT.stable
+        const isActive = activeNode === id
+        const isPulse = status === "critical" || status === "behind"
+
         return (
-          <div
-            key={label}
-            className={cn("absolute flex flex-col items-center gap-0.5 z-10")}
-            style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}
+          <button
+            key={id}
+            className={cn(
+              "absolute flex flex-col items-center gap-0.5 z-10 group transition-transform duration-200",
+              isActive ? "scale-125" : "scale-100 hover:scale-110"
+            )}
+            style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) scale(${isActive ? 1.25 : 1})` }}
+            onClick={() => onNodeClick(id)}
+            aria-label={`${label} signal node`}
           >
-            <div className={cn("w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm", bg, border)}>
-              <Icon className={cn("w-4 h-4", color)} />
+            <div className={cn(
+              "w-9 h-9 rounded-xl border-2 flex items-center justify-center shadow-sm transition-all duration-200",
+              cfg.bg, cfg.border,
+              isActive ? cn("ring-2", cfg.ring, "shadow-md") : ""
+            )}>
+              <Icon className={cn("w-4 h-4", cfg.color)} />
+              {isPulse && !isActive && (
+                <span className={cn(
+                  "absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse",
+                  status === "critical" ? "bg-[var(--status-critical)]" : "bg-[var(--status-watchlist)]"
+                )} />
+              )}
             </div>
-            <span className="text-[8px] font-semibold text-muted-foreground whitespace-nowrap">{label}</span>
-          </div>
+            <span className={cn(
+              "text-[8px] font-semibold whitespace-nowrap transition-colors",
+              isActive ? "text-foreground" : "text-muted-foreground"
+            )}>{label}</span>
+          </button>
         )
       })}
     </div>
   )
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 interface ExecControlTowerPageProps {
   onGoToTab: (tabId: string) => void
@@ -731,6 +896,7 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
   const [drawerApproveId, setDrawerApproveId] = useState<string | null>(null)
   const [approvalStatuses, setApprovalStatuses] = useState<Record<string, "pending" | "approved">>({})
   const [selectedDecision, setSelectedDecision] = useState<string | null>(null)
+  const [activeOrbitNode, setActiveOrbitNode] = useState<string>("demand")
 
   const decisionsRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<HTMLDivElement>(null)
@@ -758,11 +924,25 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
   function approve(id: string) {
     setApprovalStatuses(s => ({ ...s, [id]: "approved" }))
   }
+  function handleOrbitNodeClick(nodeId: string) {
+    setActiveOrbitNode(nodeId)
+    // scroll to matching decision if we can find it
+    const node = ORBIT_NODES.find(n => n.id === nodeId)
+    if (node && decisionsRef.current) {
+      const dec = PRIORITY_DECISIONS[node.decisionIdx]
+      if (dec) {
+        setSelectedDecision(dec.id)
+        setTimeout(() => decisionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80)
+      }
+    }
+  }
 
   const approvedCount = Object.values(approvalStatuses).filter(v => v === "approved").length
   const approvedValue = [3.4, 1.8, 1.6, 1.2, 0.7]
     .filter((_, i) => approvalStatuses[`pd-${i + 1}`] === "approved")
     .reduce((s, v) => s + v, 0)
+
+  const activePreview = ORBIT_NODES.find(n => n.id === activeOrbitNode)?.preview ?? null
 
   return (
     <div className="min-h-screen bg-background">
@@ -776,7 +956,8 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
 
             {/* Left: content */}
             <div className="flex-1 min-w-0 flex flex-col">
-              {/* Badge + title */}
+
+              {/* Badge + refresh */}
               <div className="flex items-center gap-2.5 mb-3">
                 <span className="text-[10px] font-semibold text-primary bg-accent border border-primary/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
                   Executive View
@@ -785,80 +966,88 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                 <span className="text-[10px] text-muted-foreground font-medium">Last refresh: Jun 7, 2026 · 8:30 AM</span>
               </div>
 
-              <h1 className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-3 text-balance">
+              {/* Title */}
+              <h1 className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-2 text-balance">
                 Executive Decision Engine
               </h1>
-              <p className="text-[15px] font-semibold text-foreground leading-snug mb-1 text-balance max-w-xl">
-                5 decisions to protect $8.7M before the June 30 decision lock.
+
+              {/* New punchier headline */}
+              <p className="text-[15px] font-semibold text-foreground leading-snug mb-1.5 text-balance max-w-xl">
+                Turn supply chain signals into approved actions before risk reaches the shelf.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mb-5">
-                From SKU strategy to shelf availability, the engine identifies risk, ranks next-best actions, and routes high-impact tradeoffs for approval.
+                From SKU strategy to shelf availability, the engine detects risk, ranks decisions, and routes high-impact tradeoffs for human approval.
               </p>
 
-              {/* Capability pillars */}
-              <div className="flex gap-3 mb-6">
-                {[
-                  { label: "Detect",  icon: Activity,      text: "Finds where risk is building across demand, inventory, inbound flow, network capacity, and store execution." },
-                  { label: "Decide",  icon: Zap,           text: "Ranks the highest-value actions by urgency, value protected, and operational dependency." },
-                  { label: "Execute", icon: CheckCircle2,  text: "Routes automated system actions within guardrails and sends high-impact tradeoffs to human approval." },
-                ].map(({ label, icon: Icon, text }) => (
-                  <div
-                    key={label}
-                    className="flex-1 rounded-xl border border-border bg-background px-3.5 py-3 hover:border-primary/30 hover:bg-accent transition-all cursor-default"
-                  >
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <Icon className="w-3.5 h-3.5 text-primary shrink-0" />
-                      <span className="text-[11px] font-bold text-foreground uppercase tracking-wide">{label}</span>
+              {/* ── Capability pillars — horizontal, more visual ── */}
+              <div className="flex items-stretch gap-0 mb-5">
+                {(["detect", "decide", "execute"] as const).map((key, i) => {
+                  const cfg = {
+                    detect:  { label: "Detect",  icon: Activity,     copy: "Finds risk across demand, inventory, inbound flow, network capacity, and store execution." },
+                    decide:  { label: "Decide",  icon: Zap,          copy: "Ranks actions by value, urgency, and operational dependency." },
+                    execute: { label: "Execute", icon: CheckCircle2, copy: "Automates within guardrails and routes tradeoffs for approval." },
+                  }[key]
+                  const Icon = cfg.icon
+                  return (
+                    <div key={key} className="flex items-stretch">
+                      <button
+                        onClick={() => openDrawer(CAPABILITY_DRAWERS[key])}
+                        className="group flex flex-col items-start rounded-xl border border-border bg-background px-4 py-3.5 text-left hover:border-primary/40 hover:bg-accent hover:shadow-md transition-all w-[178px]"
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <Icon className="w-4.5 h-4.5 text-primary" />
+                          </div>
+                          <span className="text-[13px] font-extrabold text-foreground uppercase tracking-wider">{cfg.label}</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-snug group-hover:text-foreground transition-colors">{cfg.copy}</p>
+                      </button>
+                      {i < 2 && (
+                        <div className="flex items-center px-2 text-primary/30">
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      )}
                     </div>
-                    <p className="text-[10px] text-muted-foreground leading-snug">{text}</p>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
-              {/* Value-at-risk ribbon */}
+              {/* ── Decision value strip — punchier ── */}
               <div className="rounded-2xl border border-border bg-background px-5 py-4 mb-4">
-                {/* Deadline pill */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-critical)] bg-[var(--status-critical-bg)] border border-[var(--status-critical)]/20 px-2.5 py-1 rounded-full">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Decision opportunity</p>
+                    <p className="text-[13px] font-semibold text-foreground leading-snug">
+                      5 priority decisions can protect an estimated{" "}
+                      <span className="text-[var(--status-stable)] font-bold">$8.7M</span>{" "}
+                      before the June 30 decision lock.
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-critical)] bg-[var(--status-critical-bg)] border border-[var(--status-critical)]/20 px-2.5 py-1 rounded-full shrink-0 ml-3">
                     <Clock className="w-3 h-3" />
-                    Decision lock · June 30 · 5:00 PM
+                    June 30 · 5:00 PM
                   </span>
-                  {approvedCount > 0 && (
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-stable)] bg-[var(--status-stable-bg)] border border-[var(--status-stable)]/20 px-2.5 py-1 rounded-full ml-auto">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {approvedCount} approved · ${approvedValue.toFixed(1)}M protected
-                    </span>
-                  )}
                 </div>
 
                 {/* Ribbon flow */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  {/* Exposure */}
-                  <div className="rounded-xl border border-[var(--status-critical)]/25 bg-[var(--status-critical-bg)] px-4 py-2.5 text-center min-w-[120px]">
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                  <div className="rounded-xl border border-[var(--status-critical)]/25 bg-[var(--status-critical-bg)] px-4 py-2.5 text-center min-w-[110px]">
                     <p className="text-[17px] font-bold text-[var(--status-critical)] leading-none">$18.1M</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">total exposure</p>
                   </div>
-
                   <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-
-                  {/* Decisions */}
-                  <div className="rounded-xl border border-border bg-muted px-4 py-2.5 text-center min-w-[110px]">
+                  <div className="rounded-xl border border-border bg-muted px-4 py-2.5 text-center min-w-[100px]">
                     <p className="text-[17px] font-bold text-foreground leading-none">5</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">priority decisions</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">decisions</p>
                   </div>
-
                   <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-
-                  {/* Value protected — hero number */}
-                  <div className="rounded-xl border border-[var(--status-stable)]/25 bg-[var(--status-stable-bg)] px-5 py-2.5 text-center min-w-[130px]">
-                    <p className="text-[26px] font-bold text-[var(--status-stable)] leading-none">$8.7M</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">estimated protected</p>
+                  {/* Hero number */}
+                  <div className="rounded-xl border-2 border-[var(--status-stable)]/40 bg-[var(--status-stable-bg)] px-5 py-2.5 text-center min-w-[130px] shadow-sm">
+                    <p className="text-[30px] font-extrabold text-[var(--status-stable)] leading-none">$8.7M</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold">estimated protected</p>
                   </div>
-
                   <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-
-                  {/* Stores reduction */}
-                  <div className="rounded-xl border border-[var(--status-watchlist)]/25 bg-[var(--status-watchlist-bg)] px-4 py-2.5 text-center min-w-[130px]">
+                  <div className="rounded-xl border border-[var(--status-watchlist)]/25 bg-[var(--status-watchlist-bg)] px-4 py-2.5 text-center min-w-[120px]">
                     <div className="flex items-center justify-center gap-1.5">
                       <p className="text-[17px] font-bold text-muted-foreground leading-none">286</p>
                       <ArrowRight className="w-3 h-3 text-[var(--status-stable)] shrink-0" />
@@ -868,7 +1057,14 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                   </div>
                 </div>
 
-                <p className="text-[10px] text-muted-foreground mt-3 italic">
+                {approvedCount > 0 && (
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-stable)] mb-2">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {approvedCount} approved · ${approvedValue.toFixed(1)}M protected so far
+                  </div>
+                )}
+
+                <p className="text-[10px] text-muted-foreground italic">
                   All figures are directional estimates. Value protected is conditional on approval before the decision lock.
                 </p>
               </div>
@@ -890,12 +1086,33 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
               </div>
             </div>
 
-            {/* Right: decision engine visual */}
-            <div className="hidden lg:flex items-center justify-center w-[260px] shrink-0 relative">
-              <div className="w-[220px] h-[220px]">
-                <DecisionEngineVisual />
+            {/* Right: interactive decision engine visual */}
+            <div className="hidden lg:flex flex-col items-center gap-3 w-[280px] shrink-0">
+              {/* Circle */}
+              <div className="relative w-[240px] h-[240px]">
+                <DecisionEngineVisual
+                  activeNode={activeOrbitNode}
+                  onNodeClick={handleOrbitNodeClick}
+                />
               </div>
+
+              {/* Preview card — shows below the circle */}
+              {activePreview && (
+                <div className="w-full rounded-xl border border-primary/20 bg-accent px-4 py-3 space-y-1.5 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] font-bold text-foreground">{activePreview.title}</p>
+                    <span className="text-[10px] font-semibold text-[var(--status-stable)] bg-[var(--status-stable-bg)] border border-[var(--status-stable)]/20 px-1.5 py-0.5 rounded-md whitespace-nowrap">{activePreview.value}</span>
+                  </div>
+                  <p className="text-[12px] font-semibold text-primary">{activePreview.signal}</p>
+                  <p className="text-[10px] text-muted-foreground leading-snug">{activePreview.insight}</p>
+                  <div className="pt-1 border-t border-border">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">Decision</p>
+                    <p className="text-[10px] text-foreground leading-snug">{activePreview.decision}</p>
+                  </div>
+                </div>
+              )}
             </div>
+
           </div>
         </div>
       </section>
@@ -1113,6 +1330,8 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                           ? "border-[var(--status-critical)]/30 bg-[var(--status-critical-bg)]/40 hover:border-[var(--status-critical)]/50"
                           : node.status === "watchlist"
                           ? "border-[var(--status-watchlist)]/30 bg-[var(--status-watchlist-bg)]/30 hover:border-[var(--status-watchlist)]/50"
+                          : node.status === "behind"
+                          ? "border-[var(--status-watchlist)]/30 bg-[var(--status-watchlist-bg)]/20 hover:border-[var(--status-watchlist)]/50"
                           : "border-border bg-background hover:border-primary/30"
                       )}
                     >
@@ -1121,12 +1340,12 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                         <div className={cn(
                           "w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
                           node.status === "critical"  ? "bg-[var(--status-critical)]/15" :
-                          node.status === "watchlist" ? "bg-[var(--status-watchlist)]/15" : "bg-muted"
+                          node.status === "watchlist" || node.status === "behind" ? "bg-[var(--status-watchlist)]/15" : "bg-muted"
                         )}>
                           <Icon className={cn(
                             "w-4 h-4",
                             node.status === "critical"  ? "text-[var(--status-critical)]" :
-                            node.status === "watchlist" ? "text-[var(--status-watchlist)]" : "text-[var(--status-stable)]"
+                            node.status === "watchlist" || node.status === "behind" ? "text-[var(--status-watchlist)]" : "text-[var(--status-stable)]"
                           )} />
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -1148,7 +1367,7 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                         "text-[10px] font-semibold px-2 py-0.5 rounded-md border mb-2.5 self-start",
                         node.status === "critical"
                           ? "bg-[var(--status-critical-bg)] text-[var(--status-critical)] border-[var(--status-critical)]/20"
-                          : node.status === "watchlist"
+                          : node.status === "watchlist" || node.status === "behind"
                           ? "bg-[var(--status-watchlist-bg)] text-[var(--status-watchlist)] border-[var(--status-watchlist)]/20"
                           : "bg-[var(--status-stable-bg)] text-[var(--status-stable)] border-[var(--status-stable)]/20"
                       )}>
@@ -1184,6 +1403,7 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
               {[
                 { status: "critical",  label: "Critical — active risk" },
                 { status: "watchlist", label: "Watchlist — monitored" },
+                { status: "behind",    label: "Behind — execution gap" },
                 { status: "stable",    label: "Stable — on track" },
               ].map(l => (
                 <div key={l.status} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
