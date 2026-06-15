@@ -21,7 +21,6 @@ import {
   Bookmark,
   TrendingDown,
   Activity,
-  Cpu,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { StatusLevel } from "./ECTData"
@@ -675,99 +674,15 @@ function ECTDetailDrawer({
   )
 }
 
-// ─── Orbit node preview data ──────────────────────────────────────────────────
+// ─── Signal-to-action flow nodes (hero strip) ────────────────────────────────
 
-const ORBIT_NODES = [
-  {
-    id: "demand",
-    angle: -90,
-    icon: BarChart2,
-    label: "Demand",
-    status: "critical",
-    tabId: "demand",
-    decisionIdx: 0, // pd-1
-    preview: {
-      title: "Demand signal",
-      signal: "-4.8% forecast bias",
-      insight: "Seasonal / Event demand is under-forecast.",
-      decision: "Forecast uplift + protected allocation",
-      value: "$3.4M estimated",
-    },
-  },
-  {
-    id: "inventory",
-    angle: -18,
-    icon: Package,
-    label: "Inventory",
-    status: "critical",
-    tabId: "inventory",
-    decisionIdx: 0, // also pd-1
-    preview: {
-      title: "Inventory signal",
-      signal: "214 stores exposed",
-      insight: "Inventory exists, but allocation readiness is constrained.",
-      decision: "Protected push allocation",
-      value: "Included in $3.4M decision",
-    },
-  },
-  {
-    id: "supplier-inbound",
-    angle: 54,
-    icon: Truck,
-    label: "Supplier",
-    status: "watchlist",
-    tabId: "supplier-inbound",
-    decisionIdx: 2, // pd-3
-    preview: {
-      title: "Supplier signal",
-      signal: "43 at-risk POs",
-      insight: "Delayed and short-shipped POs narrow recovery options.",
-      decision: "Expedite delayed Seasonal PO",
-      value: "$1.6M estimated",
-    },
-  },
-  {
-    id: "dc-capacity",
-    angle: 126,
-    icon: Warehouse,
-    label: "DC / Transport",
-    status: "critical",
-    tabId: "dc-capacity",
-    decisionIdx: 3, // pd-4
-    preview: {
-      title: "Network signal",
-      signal: "3 DCs at capacity risk",
-      insight: "Savannah and Joliet pressure may delay priority flow.",
-      decision: "Re-sequence outbound waves",
-      value: "$1.2M estimated",
-    },
-  },
-  {
-    id: "store-execution",
-    angle: 198,
-    icon: Store,
-    label: "Store",
-    status: "behind",
-    tabId: "store-execution",
-    decisionIdx: 1, // pd-2
-    preview: {
-      title: "Store signal",
-      signal: "$4.3M aged in backroom",
-      insight: "Delivered inventory is not converting to shelf availability fast enough.",
-      decision: "Clear backroom aging and display backlog",
-      value: "$1.8M estimated",
-    },
-  },
+const SIGNAL_FLOW_NODES = [
+  { id: "demand",          icon: BarChart2, label: "Demand",       status: "critical",  signal: "-4.8% bias",        tabId: "demand"           },
+  { id: "inventory",       icon: Package,  label: "Inventory",    status: "critical",  signal: "214 stores exposed",tabId: "inventory"        },
+  { id: "supplier-inbound",icon: Truck,    label: "Supplier",     status: "watchlist", signal: "43 at-risk POs",    tabId: "supplier-inbound" },
+  { id: "dc-capacity",     icon: Warehouse,label: "DC / Transport",status: "critical", signal: "3 DCs at risk",     tabId: "dc-capacity"      },
+  { id: "store-execution", icon: Store,    label: "Store",        status: "behind",    signal: "$4.3M aged",        tabId: "store-execution"  },
 ]
-
-// ─── Status config extended for "behind" ─────────────────────────────────────
-
-const STATUS_CFG_EXT: Record<string, { color: string; bg: string; border: string; ring: string }> = {
-  critical:  { color: "text-[var(--status-critical)]",  bg: "bg-[var(--status-critical-bg)]",  border: "border-[var(--status-critical)]/30",  ring: "ring-[var(--status-critical)]/40"  },
-  watchlist: { color: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", ring: "ring-[var(--status-watchlist)]/40" },
-  stable:    { color: "text-[var(--status-stable)]",    bg: "bg-[var(--status-stable-bg)]",    border: "border-[var(--status-stable)]/30",    ring: "ring-[var(--status-stable)]/40"    },
-  behind:    { color: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", ring: "ring-[var(--status-watchlist)]/40" },
-}
 
 // ─── Capability pillar drawer payloads ───────────────────────────────────────
 
@@ -816,76 +731,6 @@ const CAPABILITY_DRAWERS: Record<string, DrawerPayload> = {
   },
 }
 
-// ─── Decision engine visual (interactive) ────────────────────────────────────
-
-function DecisionEngineVisual({
-  activeNode,
-  onNodeClick,
-}: {
-  activeNode: string | null
-  onNodeClick: (id: string) => void
-}) {
-  return (
-    <div className="relative w-full h-full flex items-center justify-center select-none" aria-label="Decision engine signal diagram">
-      {/* Pulsing rings */}
-      <span className="absolute w-48 h-48 rounded-full border border-primary/10 animate-ping pointer-events-none" style={{ animationDuration: "3s" }} />
-      <span className="absolute w-36 h-36 rounded-full border border-primary/15 animate-ping pointer-events-none" style={{ animationDuration: "2.2s", animationDelay: "0.4s" }} />
-      {/* Static orbit rings */}
-      <span className="absolute w-52 h-52 rounded-full border border-primary/8 pointer-events-none" />
-      <span className="absolute w-40 h-40 rounded-full border border-primary/12 pointer-events-none" />
-      <span className="absolute w-28 h-28 rounded-full border border-primary/18 pointer-events-none" />
-
-      {/* Center node */}
-      <div className="relative z-10 w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex flex-col items-center justify-center shadow-lg gap-0.5 pointer-events-none">
-        <Cpu className="w-6 h-6 text-primary" />
-        <span className="text-[7px] font-bold text-primary uppercase tracking-wide leading-none">Engine</span>
-      </div>
-
-      {/* Orbit nodes */}
-      {ORBIT_NODES.map(({ id, angle, icon: Icon, label, status }) => {
-        const rad = (angle * Math.PI) / 180
-        const r = 88
-        const x = 50 + (r / 1.6) * Math.cos(rad)
-        const y = 50 + (r / 1.6) * Math.sin(rad)
-        const cfg = STATUS_CFG_EXT[status] ?? STATUS_CFG_EXT.stable
-        const isActive = activeNode === id
-        const isPulse = status === "critical" || status === "behind"
-
-        return (
-          <button
-            key={id}
-            className={cn(
-              "absolute flex flex-col items-center gap-0.5 z-10 group transition-transform duration-200",
-              isActive ? "scale-125" : "scale-100 hover:scale-110"
-            )}
-            style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) scale(${isActive ? 1.25 : 1})` }}
-            onClick={() => onNodeClick(id)}
-            aria-label={`${label} signal node`}
-          >
-            <div className={cn(
-              "w-9 h-9 rounded-xl border-2 flex items-center justify-center shadow-sm transition-all duration-200",
-              cfg.bg, cfg.border,
-              isActive ? cn("ring-2", cfg.ring, "shadow-md") : ""
-            )}>
-              <Icon className={cn("w-4 h-4", cfg.color)} />
-              {isPulse && !isActive && (
-                <span className={cn(
-                  "absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse",
-                  status === "critical" ? "bg-[var(--status-critical)]" : "bg-[var(--status-watchlist)]"
-                )} />
-              )}
-            </div>
-            <span className={cn(
-              "text-[8px] font-semibold whitespace-nowrap transition-colors",
-              isActive ? "text-foreground" : "text-muted-foreground"
-            )}>{label}</span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 interface ExecControlTowerPageProps {
   onGoToTab: (tabId: string) => void
 }
@@ -896,7 +741,6 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
   const [drawerApproveId, setDrawerApproveId] = useState<string | null>(null)
   const [approvalStatuses, setApprovalStatuses] = useState<Record<string, "pending" | "approved">>({})
   const [selectedDecision, setSelectedDecision] = useState<string | null>(null)
-  const [activeOrbitNode, setActiveOrbitNode] = useState<string>("demand")
 
   const decisionsRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<HTMLDivElement>(null)
@@ -924,196 +768,186 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
   function approve(id: string) {
     setApprovalStatuses(s => ({ ...s, [id]: "approved" }))
   }
-  function handleOrbitNodeClick(nodeId: string) {
-    setActiveOrbitNode(nodeId)
-    // scroll to matching decision if we can find it
-    const node = ORBIT_NODES.find(n => n.id === nodeId)
-    if (node && decisionsRef.current) {
-      const dec = PRIORITY_DECISIONS[node.decisionIdx]
-      if (dec) {
-        setSelectedDecision(dec.id)
-        setTimeout(() => decisionsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80)
-      }
-    }
-  }
 
   const approvedCount = Object.values(approvalStatuses).filter(v => v === "approved").length
   const approvedValue = [3.4, 1.8, 1.6, 1.2, 0.7]
     .filter((_, i) => approvalStatuses[`pd-${i + 1}`] === "approved")
     .reduce((s, v) => s + v, 0)
 
-  const activePreview = ORBIT_NODES.find(n => n.id === activeOrbitNode)?.preview ?? null
-
   return (
     <div className="min-h-screen bg-background">
 
       {/* ══════════════════════════════════════════════════════════════════════
-          SECTION 1 — PREMIUM HERO
+          SECTION 1 — HERO
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="border-b border-border bg-card overflow-hidden">
-        <div className="px-8 py-8">
-          <div className="flex items-stretch gap-8">
+      <section className="border-b border-border bg-card">
+        <div className="px-8 py-8 max-w-[1600px]">
 
-            {/* Left: content */}
-            <div className="flex-1 min-w-0 flex flex-col">
+          {/* Badge + refresh */}
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="text-[10px] font-semibold text-primary bg-accent border border-primary/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
+              Executive View
+            </span>
+            <span className="w-1 h-1 rounded-full bg-border" />
+            <span className="text-[10px] text-muted-foreground font-medium">Last refresh: Jun 7, 2026 · 8:30 AM</span>
+          </div>
 
-              {/* Badge + refresh */}
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="text-[10px] font-semibold text-primary bg-accent border border-primary/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
-                  Executive View
-                </span>
-                <span className="w-1 h-1 rounded-full bg-border" />
-                <span className="text-[10px] text-muted-foreground font-medium">Last refresh: Jun 7, 2026 · 8:30 AM</span>
-              </div>
+          {/* Title */}
+          <h1 className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-3">
+            Executive Decision Engine
+          </h1>
 
-              {/* Title */}
-              <h1 className="text-[28px] font-bold text-foreground tracking-tight leading-none mb-2 text-balance">
-                Executive Decision Engine
-              </h1>
+          {/* Single punchy tagline */}
+          <p className="text-[15px] font-semibold text-foreground leading-snug mb-6 max-w-3xl text-balance">
+            Your executive layer for turning SKU strategy, supply chain signals, and store execution risk into approved actions before the June 30 decision lock.
+          </p>
 
-              {/* New punchier headline */}
-              <p className="text-[15px] font-semibold text-foreground leading-snug mb-1.5 text-balance max-w-xl">
-                Turn supply chain signals into approved actions before risk reaches the shelf.
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mb-5">
-                From SKU strategy to shelf availability, the engine detects risk, ranks decisions, and routes high-impact tradeoffs for human approval.
-              </p>
+          {/* ── Capability tiles ── */}
+          <div className="flex items-stretch gap-0 mb-6">
+            {(["detect", "decide", "execute"] as const).map((key, i) => {
+              const cfg = {
+                detect:  { label: "Detect",  icon: Activity,     copy: "Finds risk across demand, inventory, inbound flow, network capacity, and store execution." },
+                decide:  { label: "Decide",  icon: Zap,          copy: "Ranks actions by value protected, urgency, and operational dependency." },
+                execute: { label: "Execute", icon: CheckCircle2, copy: "Automates within guardrails and routes high-impact tradeoffs for approval." },
+              }[key]
+              const Icon = cfg.icon
+              return (
+                <div key={key} className="flex items-stretch">
+                  <button
+                    onClick={() => openDrawer(CAPABILITY_DRAWERS[key])}
+                    className="group flex flex-col items-start rounded-xl border border-border bg-background px-5 py-4 text-left hover:border-primary/40 hover:bg-accent hover:shadow-md transition-all w-[210px]"
+                  >
+                    <div className="flex items-center gap-2.5 mb-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <span className="text-[14px] font-extrabold text-foreground uppercase tracking-wide">{cfg.label}</span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground leading-snug group-hover:text-foreground transition-colors">{cfg.copy}</p>
+                  </button>
+                  {i < 2 && (
+                    <div className="flex items-center px-2.5 text-primary/30">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
 
-              {/* ── Capability pillars — horizontal, more visual ── */}
-              <div className="flex items-stretch gap-0 mb-5">
-                {(["detect", "decide", "execute"] as const).map((key, i) => {
-                  const cfg = {
-                    detect:  { label: "Detect",  icon: Activity,     copy: "Finds risk across demand, inventory, inbound flow, network capacity, and store execution." },
-                    decide:  { label: "Decide",  icon: Zap,          copy: "Ranks actions by value, urgency, and operational dependency." },
-                    execute: { label: "Execute", icon: CheckCircle2, copy: "Automates within guardrails and routes tradeoffs for approval." },
-                  }[key]
-                  const Icon = cfg.icon
-                  return (
-                    <div key={key} className="flex items-stretch">
-                      <button
-                        onClick={() => openDrawer(CAPABILITY_DRAWERS[key])}
-                        className="group flex flex-col items-start rounded-xl border border-border bg-background px-4 py-3.5 text-left hover:border-primary/40 hover:bg-accent hover:shadow-md transition-all w-[178px]"
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                            <Icon className="w-4.5 h-4.5 text-primary" />
-                          </div>
-                          <span className="text-[13px] font-extrabold text-foreground uppercase tracking-wider">{cfg.label}</span>
-                        </div>
-                        <p className="text-[10px] text-muted-foreground leading-snug group-hover:text-foreground transition-colors">{cfg.copy}</p>
-                      </button>
-                      {i < 2 && (
-                        <div className="flex items-center px-2 text-primary/30">
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
+          {/* ── Signal-to-action flow strip ── */}
+          <div className="mb-6">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2.5">Signal-to-action path</p>
+            <div className="flex items-center gap-0 flex-wrap">
+              {SIGNAL_FLOW_NODES.map((node, i) => {
+                const Icon = node.icon
+                const nodeDrawer = CHAIN_NODES.find(n => n.id === node.id)?.drawer
+                const sc = {
+                  critical:  { iconCls: "text-[var(--status-critical)]",  bg: "bg-[var(--status-critical-bg)]",  border: "border-[var(--status-critical)]/30",  sigCls: "text-[var(--status-critical)]"  },
+                  watchlist: { iconCls: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", sigCls: "text-[var(--status-watchlist)]" },
+                  behind:    { iconCls: "text-[var(--status-watchlist)]", bg: "bg-[var(--status-watchlist-bg)]", border: "border-[var(--status-watchlist)]/30", sigCls: "text-[var(--status-watchlist)]" },
+                  stable:    { iconCls: "text-[var(--status-stable)]",    bg: "bg-[var(--status-stable-bg)]",    border: "border-[var(--status-stable)]/30",    sigCls: "text-[var(--status-stable)]"    },
+                }[node.status] ?? { iconCls: "text-muted-foreground", bg: "bg-muted", border: "border-border", sigCls: "text-muted-foreground" }
+
+                return (
+                  <div key={node.id} className="flex items-center">
+                    <button
+                      onClick={() => nodeDrawer && openDrawer(nodeDrawer)}
+                      className={cn(
+                        "group flex flex-col items-start rounded-xl border px-3.5 py-3 text-left transition-all hover:shadow-md w-[150px] shrink-0",
+                        sc.bg, sc.border
                       )}
-                    </div>
-                  )
-                })}
-              </div>
+                    >
+                      <div className="flex items-center gap-1.5 mb-1.5 w-full min-w-0">
+                        <Icon className={cn("w-3.5 h-3.5 shrink-0", sc.iconCls)} />
+                        <span className="text-[11px] font-bold text-foreground truncate flex-1">{node.label}</span>
+                        <StatusBadge status={node.status} className="shrink-0" />
+                      </div>
+                      <p className={cn("text-[11px] font-semibold leading-snug", sc.sigCls)}>{node.signal}</p>
+                    </button>
+                    {i < SIGNAL_FLOW_NODES.length - 1 && (
+                      <div className="flex items-center px-1.5 text-muted-foreground/40 shrink-0">
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
 
-              {/* ── Decision value strip — punchier ── */}
-              <div className="rounded-2xl border border-border bg-background px-5 py-4 mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Decision opportunity</p>
-                    <p className="text-[13px] font-semibold text-foreground leading-snug">
-                      5 priority decisions can protect an estimated{" "}
-                      <span className="text-[var(--status-stable)] font-bold">$8.7M</span>{" "}
-                      before the June 30 decision lock.
-                    </p>
-                  </div>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-critical)] bg-[var(--status-critical-bg)] border border-[var(--status-critical)]/20 px-2.5 py-1 rounded-full shrink-0 ml-3">
-                    <Clock className="w-3 h-3" />
-                    June 30 · 5:00 PM
-                  </span>
-                </div>
-
-                {/* Ribbon flow */}
-                <div className="flex items-center gap-2 flex-wrap mb-3">
-                  <div className="rounded-xl border border-[var(--status-critical)]/25 bg-[var(--status-critical-bg)] px-4 py-2.5 text-center min-w-[110px]">
-                    <p className="text-[17px] font-bold text-[var(--status-critical)] leading-none">$18.1M</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">total exposure</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                  <div className="rounded-xl border border-border bg-muted px-4 py-2.5 text-center min-w-[100px]">
-                    <p className="text-[17px] font-bold text-foreground leading-none">5</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">decisions</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                  {/* Hero number */}
-                  <div className="rounded-xl border-2 border-[var(--status-stable)]/40 bg-[var(--status-stable-bg)] px-5 py-2.5 text-center min-w-[130px] shadow-sm">
-                    <p className="text-[30px] font-extrabold text-[var(--status-stable)] leading-none">$8.7M</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold">estimated protected</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                  <div className="rounded-xl border border-[var(--status-watchlist)]/25 bg-[var(--status-watchlist-bg)] px-4 py-2.5 text-center min-w-[120px]">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <p className="text-[17px] font-bold text-muted-foreground leading-none">286</p>
-                      <ArrowRight className="w-3 h-3 text-[var(--status-stable)] shrink-0" />
-                      <p className="text-[17px] font-bold text-[var(--status-stable)] leading-none">146</p>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">stores at risk</p>
-                  </div>
-                </div>
-
-                {approvedCount > 0 && (
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-stable)] mb-2">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {approvedCount} approved · ${approvedValue.toFixed(1)}M protected so far
-                  </div>
-                )}
-
-                <p className="text-[10px] text-muted-foreground italic">
-                  All figures are directional estimates. Value protected is conditional on approval before the decision lock.
+          {/* ── Decision opportunity strip ── */}
+          <div className="rounded-2xl border border-border bg-background px-5 py-4 mb-5">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Decision opportunity</p>
+                <p className="text-[14px] font-semibold text-foreground leading-snug">
+                  5 priority decisions can protect an estimated{" "}
+                  <span className="text-[var(--status-stable)] font-extrabold">$8.7M</span>{" "}
+                  before the June 30 decision lock.
                 </p>
               </div>
-
-              {/* CTAs */}
-              <div className="flex items-center gap-2.5">
-                <button
-                  onClick={scrollToDecisions}
-                  className="flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
-                >
-                  Review Priority Decisions <ArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={scrollToMap}
-                  className="flex items-center gap-2 border border-border text-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-muted transition-colors"
-                >
-                  View Decision Map
-                </button>
-              </div>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-critical)] bg-[var(--status-critical-bg)] border border-[var(--status-critical)]/20 px-3 py-1.5 rounded-full shrink-0 ml-4">
+                <Clock className="w-3.5 h-3.5" />
+                June 30 · 5:00 PM
+              </span>
             </div>
 
-            {/* Right: interactive decision engine visual */}
-            <div className="hidden lg:flex flex-col items-center gap-3 w-[280px] shrink-0">
-              {/* Circle */}
-              <div className="relative w-[240px] h-[240px]">
-                <DecisionEngineVisual
-                  activeNode={activeOrbitNode}
-                  onNodeClick={handleOrbitNodeClick}
-                />
+            {/* Ribbon */}
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              <div className="rounded-xl border border-[var(--status-critical)]/25 bg-[var(--status-critical-bg)] px-4 py-2.5 text-center min-w-[120px]">
+                <p className="text-[18px] font-bold text-[var(--status-critical)] leading-none">$18.1M</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">total exposure</p>
               </div>
-
-              {/* Preview card — shows below the circle */}
-              {activePreview && (
-                <div className="w-full rounded-xl border border-primary/20 bg-accent px-4 py-3 space-y-1.5 animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] font-bold text-foreground">{activePreview.title}</p>
-                    <span className="text-[10px] font-semibold text-[var(--status-stable)] bg-[var(--status-stable-bg)] border border-[var(--status-stable)]/20 px-1.5 py-0.5 rounded-md whitespace-nowrap">{activePreview.value}</span>
-                  </div>
-                  <p className="text-[12px] font-semibold text-primary">{activePreview.signal}</p>
-                  <p className="text-[10px] text-muted-foreground leading-snug">{activePreview.insight}</p>
-                  <div className="pt-1 border-t border-border">
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">Decision</p>
-                    <p className="text-[10px] text-foreground leading-snug">{activePreview.decision}</p>
-                  </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+              <div className="rounded-xl border border-border bg-muted px-4 py-2.5 text-center min-w-[100px]">
+                <p className="text-[18px] font-bold text-foreground leading-none">5</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">decisions</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+              <div className="rounded-xl border-2 border-[var(--status-stable)]/40 bg-[var(--status-stable-bg)] px-6 py-2.5 text-center min-w-[150px] shadow-sm">
+                <p className="text-[34px] font-extrabold text-[var(--status-stable)] leading-none">$8.7M</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold">estimated protected</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+              <div className="rounded-xl border border-[var(--status-watchlist)]/25 bg-[var(--status-watchlist-bg)] px-4 py-2.5 text-center min-w-[130px]">
+                <div className="flex items-center justify-center gap-1.5">
+                  <p className="text-[18px] font-bold text-muted-foreground leading-none">286</p>
+                  <ArrowRight className="w-3 h-3 text-[var(--status-stable)] shrink-0" />
+                  <p className="text-[18px] font-bold text-[var(--status-stable)] leading-none">146</p>
                 </div>
-              )}
+                <p className="text-[10px] text-muted-foreground mt-0.5">stores at risk</p>
+              </div>
             </div>
 
+            {approvedCount > 0 && (
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--status-stable)] mb-2">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                {approvedCount} approved · ${approvedValue.toFixed(1)}M protected so far
+              </div>
+            )}
+
+            <p className="text-[10px] text-muted-foreground italic">
+              All figures are directional estimates. Value protected is conditional on approval before the decision lock.
+            </p>
           </div>
+
+          {/* CTAs */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={scrollToDecisions}
+              className="flex items-center gap-2 bg-primary text-primary-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              Review Priority Decisions <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={scrollToMap}
+              className="flex items-center gap-2 border border-border text-foreground text-[13px] font-semibold px-5 py-2.5 rounded-xl hover:bg-muted transition-colors"
+            >
+              View Decision Map
+            </button>
+          </div>
+
         </div>
       </section>
 
@@ -1357,14 +1191,14 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                       </div>
 
                       {/* Name */}
-                      <p className="text-[12px] font-bold text-foreground mb-1 leading-snug">{node.name}</p>
+                      <p className="text-[13px] font-bold text-foreground mb-1.5 leading-snug">{node.name}</p>
 
                       {/* Primary issue */}
-                      <p className="text-[10px] text-muted-foreground leading-snug mb-3 flex-1">{node.primaryIssue}</p>
+                      <p className="text-[11px] text-muted-foreground leading-snug mb-3 flex-1">{node.primaryIssue}</p>
 
                       {/* Signal */}
                       <div className={cn(
-                        "text-[10px] font-semibold px-2 py-0.5 rounded-md border mb-2.5 self-start",
+                        "text-[11px] font-semibold px-2 py-1 rounded-md border mb-2.5 self-start",
                         node.status === "critical"
                           ? "bg-[var(--status-critical-bg)] text-[var(--status-critical)] border-[var(--status-critical)]/20"
                           : node.status === "watchlist" || node.status === "behind"
@@ -1375,12 +1209,12 @@ export default function ExecControlTowerPage({ onGoToTab }: ExecControlTowerPage
                       </div>
 
                       {/* Value tag */}
-                      <p className="text-[10px] text-muted-foreground font-medium mb-3 leading-snug">{node.valueTag}</p>
+                      <p className="text-[11px] text-muted-foreground font-medium mb-3 leading-snug">{node.valueTag}</p>
 
                       {/* Open link */}
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-primary group-hover:underline mt-auto">
+                      <div className="flex items-center gap-1 text-[11px] font-semibold text-primary group-hover:underline mt-auto">
                         <span>{node.openLink}</span>
-                        <ChevronRight className="w-3 h-3" />
+                        <ChevronRight className="w-3.5 h-3.5" />
                       </div>
                     </button>
 
