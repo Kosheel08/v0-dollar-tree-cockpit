@@ -48,7 +48,7 @@ const agentActions: AgentAction[] = [
     id: "ai-1",
     timestamp: "Today · 8:12 AM",
     title: "Classified 340 SKU families as Seasonal / Event",
-    sourceTab: "AI-Driven SKU Segmentation",
+    sourceTab: "SKU Strategy Segmentation",
     sourceTabId: "sku-segmentation",
     segment: "Seasonal / Event",
     detected: "Short selling window, seasonal demand spike, and limited post-event replenishment value",
@@ -59,7 +59,7 @@ const agentActions: AgentAction[] = [
       status: "completed",
       explanation: "AI detected a short selling window, seasonal demand velocity, and limited post-event value across 340 SKU families and autonomously assigned the Seasonal / Event segment.",
       signals: ["Short selling window signal", "Seasonal velocity acceleration", "Post-event inventory risk", "Historical markdown pattern"],
-      sourceTabs: [{ label: "AI-Driven SKU Segmentation", id: "sku-segmentation" }],
+      sourceTabs: [{ label: "SKU Strategy Segmentation", id: "sku-segmentation" }],
       primarySourceTabId: "sku-segmentation",
       segment: "Seasonal / Event",
       segmentStrategy: "Pre-window push allocation with protected inventory before selling window opens",
@@ -240,7 +240,7 @@ export default function SKUAgentLog({ onOpenDrawer, onGoToTab }: SKUAgentLogProp
           <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shrink-0">
             <Bot className="w-3 h-3 text-primary-foreground" />
           </div>
-          <p className="text-[13px] font-semibold text-foreground">AI Actions Completed</p>
+          <p className="text-[13px] font-semibold text-foreground">System Actions Completed</p>
         </div>
         <p className="text-[11px] text-muted-foreground leading-relaxed ml-7">
           Autonomous classification, detection, and routing actions completed across the cockpit within approved guardrails

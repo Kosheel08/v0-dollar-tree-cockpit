@@ -44,10 +44,10 @@ export default function SKUSegmentationPage({ onGoToTab }: { onGoToTab: (tab: st
               <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
                 <Cpu className="w-4 h-4 text-primary-foreground" />
               </div>
-              <h1 className="text-[18px] font-bold text-foreground tracking-tight">AI-Driven SKU Segmentation</h1>
+              <h1 className="text-[18px] font-bold text-foreground tracking-tight">SKU Strategy Segmentation</h1>
             </div>
             <p className="text-[13px] text-muted-foreground leading-relaxed ml-9">
-              AI-classified SKU segments, fit-for-purpose strategies, and human approval actions across the Dollar Tree assortment
+              Segmentation-led SKU strategies, fit-for-purpose planning logic, and human approval actions across the Dollar Tree assortment
             </p>
           </div>
           <div className="flex flex-col items-end gap-1 shrink-0">
@@ -112,7 +112,7 @@ export default function SKUSegmentationPage({ onGoToTab }: { onGoToTab: (tab: st
         {/* Agentic AI divider */}
         <div className="border-t border-border pt-2">
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">
-            Agentic AI layer — autonomous actions and human approvals
+            Agentic workflow — automated actions and human approvals
           </p>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             SKU Segment is assigned by this tab and determines the planning, allocation, fulfillment, and approval strategy used across the cockpit.

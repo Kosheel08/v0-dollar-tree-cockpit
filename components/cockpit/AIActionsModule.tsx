@@ -84,9 +84,9 @@ export default function AIActionsModule({ actions, approvals, onGoToTab, variant
         <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shrink-0">
           <Bot className="w-3 h-3 text-primary-foreground" />
         </div>
-        <p className="text-[13px] font-semibold text-foreground">AI Actions &amp; Human Approvals</p>
+        <p className="text-[13px] font-semibold text-foreground">System Actions &amp; Human Approvals</p>
         <span className="text-[10px] font-semibold bg-primary/8 text-primary border border-primary/20 px-2 py-0.5 rounded-md uppercase tracking-widest">
-          Agentic AI
+          Agentic Workflow
         </span>
       </div>
 
@@ -97,7 +97,7 @@ export default function AIActionsModule({ actions, approvals, onGoToTab, variant
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-1.5 mb-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <p className="text-[11px] font-semibold text-foreground">AI Actions Completed</p>
+            <p className="text-[11px] font-semibold text-foreground">System Actions Completed</p>
             <span className="ml-auto text-[10px] text-muted-foreground font-medium">{actions.length} actions</span>
           </div>
 

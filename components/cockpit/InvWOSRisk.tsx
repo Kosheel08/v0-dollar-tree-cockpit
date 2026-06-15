@@ -36,7 +36,7 @@ const rows: Array<{
       ],
       humanApprovalRequired: true,
       businessImpact: "$2.8M service risk and 72 Southeast stores exposed. Short selling window means there is no recovery time if allocation is not approved before Jun 10 lock.",
-      recommendedAction: "Approve Seasonal / Event protected push allocation in the AI Actions section to prioritize flow to the 72 highest-risk stores.",
+      recommendedAction: "Approve Seasonal / Event protected push allocation in the System Actions section to prioritize flow to the 72 highest-risk stores.",
     },
   },
   {

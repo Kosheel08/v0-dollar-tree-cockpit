@@ -83,7 +83,7 @@ const kpis: Array<{
         { label: "Carrying risk",     value: "$720K if not rebalanced" },
       ],
       businessImpact: "Transferring excess Treasure Hunt inventory from Marietta DC to the Southeast demand pool reduces carrying risk and supports under-stocked stores without requiring new receipts.",
-      recommendedAction: "Review and approve the Treasure Hunt controlled transfer in the AI Actions & Human Approvals section.",
+      recommendedAction: "Review and approve the Treasure Hunt controlled transfer in the System Actions & Human Approvals section.",
     },
   },
   {

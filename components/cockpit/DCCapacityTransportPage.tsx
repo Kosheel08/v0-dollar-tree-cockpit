@@ -706,9 +706,9 @@ export default function DCCapacityTransportPage({ onGoToTab }: DCCapacityTranspo
           <div className="flex items-start justify-between gap-3 mb-5">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-sm font-semibold text-foreground">AI Actions &amp; Human Approvals</h2>
+                <h2 className="text-sm font-semibold text-foreground">System Actions &amp; Human Approvals</h2>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-primary/10 text-primary">
-                  <Bot className="w-3 h-3" /> AGENTIC AI
+                  <Bot className="w-3 h-3" /> AGENTIC WORKFLOW
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">What the AI has prioritized within network guardrails, and what still requires operations approval before execution</p>
@@ -718,7 +718,7 @@ export default function DCCapacityTransportPage({ onGoToTab }: DCCapacityTranspo
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left: AI Actions Completed */}
             <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">AI Actions Completed</p>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">System Actions Completed</p>
               <div className="space-y-2">
                 {dcActions.map((action) => (
                   <button

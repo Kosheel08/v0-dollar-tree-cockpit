@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------
-// Executive Control Tower — static data
+// Executive Decision Engine — static data
 // ---------------------------------------------------------------
 
 export type StatusLevel = "critical" | "watchlist" | "stable" | "recommended" | "high-risk"

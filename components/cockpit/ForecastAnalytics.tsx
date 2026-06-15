@@ -88,7 +88,7 @@ const chipDrawers: DrawerPayload[] = [
     sourceTabs: [{ label: "Demand Planning", id: "demand" }],
     primarySourceTabId: "demand",
     businessImpact: "The –9.6% under-forecast bias in Seasonal / Event SKUs is the single largest driver of revenue-at-risk exposure on this tab.",
-    recommendedAction: "Approve the Seasonal / Event forecast uplift in the AI Actions & Human Approvals section.",
+    recommendedAction: "Approve the Seasonal / Event forecast uplift in the System Actions & Human Approvals section.",
     humanApprovalRequired: true,
     metrics: [
       { label: "Accuracy gap",    value: "–5.4 pts" },

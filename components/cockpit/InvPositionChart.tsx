@@ -48,7 +48,7 @@ const chips: Array<{ label: string; cls: string; drawer: DrawerPayload }> = [
       segment: "Seasonal / Event",
       metrics: [{ label: "Shortage", value: "$3.6M below target" }, { label: "WOS", value: "2.1 weeks" }, { label: "Stores exposed", value: "72" }],
       businessImpact: "$2.8M service risk if protected allocation is not approved before the selling window.",
-      recommendedAction: "Approve Seasonal / Event protected push allocation in the AI Actions section.",
+      recommendedAction: "Approve Seasonal / Event protected push allocation in the System Actions section.",
     },
   },
   {
@@ -64,7 +64,7 @@ const chips: Array<{ label: string; cls: string; drawer: DrawerPayload }> = [
       segment: "Treasure Hunt / Limited Buy",
       metrics: [{ label: "Overstock", value: "$4.2M above target" }, { label: "WOS", value: "5.6 weeks" }, { label: "Transfer route", value: "Marietta → Savannah DC" }],
       businessImpact: "$720K carrying risk if excess inventory remains in the Southwest. Transfer reduces markdown exposure.",
-      recommendedAction: "Approve the Treasure Hunt controlled transfer in the AI Actions section.",
+      recommendedAction: "Approve the Treasure Hunt controlled transfer in the System Actions section.",
     },
   },
   {

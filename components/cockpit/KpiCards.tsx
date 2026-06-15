@@ -32,7 +32,7 @@ const kpiDrawers: DrawerPayload[] = [
     sourceTabs: [{ label: "Demand Planning", id: "demand" }],
     primarySourceTabId: "demand",
     businessImpact: "Under-forecast bias leads to under-allocation to high-velocity stores, increasing stockout risk and lost sales exposure.",
-    recommendedAction: "Review uplift approvals for Seasonal / Event and Promo / Merchant-Driven SKUs in the AI Actions & Human Approvals section.",
+    recommendedAction: "Review uplift approvals for Seasonal / Event and Promo / Merchant-Driven SKUs in the System Actions & Human Approvals section.",
     humanApprovalRequired: true,
     metrics: [
       { label: "Overall bias", value: "-4.8%" },

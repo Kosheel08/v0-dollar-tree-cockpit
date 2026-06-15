@@ -125,7 +125,7 @@ const kpiCards: {
       ],
       humanApprovalRequired: true,
       businessImpact: "$4.3M of inventory is in stores but not available to customers. Every additional hour of aging during the selling window reduces effective sell-through and increases markdown risk.",
-      recommendedAction: "Approve the P1 field action for backroom aging in the AI Actions & Human Approvals section.",
+      recommendedAction: "Approve the P1 field action for backroom aging in the System Actions & Human Approvals section.",
       guardrailNote: "Backroom aging is tracked autonomously. Labor reallocation and DM field action require human approval.",
     },
   },
@@ -152,7 +152,7 @@ const kpiCards: {
       ],
       humanApprovalRequired: true,
       businessImpact: "300 stores with unset displays and 39 stores missing photo verification represent $520K of promo execution risk and $610K of additional exposure from party displays staged but not set before Jun 9.",
-      recommendedAction: "Approve the display-readiness dependency rule in the AI Actions & Human Approvals section.",
+      recommendedAction: "Approve the display-readiness dependency rule in the System Actions & Human Approvals section.",
       guardrailNote: "Display completion is tracked autonomously. Display rule and allocation dependency require merchandising and field leadership sign-off.",
     },
   },
@@ -200,7 +200,7 @@ const riskRows: MatrixRow[] = [
       ],
       humanApprovalRequired: true,
       businessImpact: "$1.7M of Seasonal / Event inventory is in stores but not available to customers. Without field action, this product will miss the selling window.",
-      recommendedAction: "Prioritize backroom-to-shelf work for high-impact stores. Approve field action in the AI Actions & Human Approvals section.",
+      recommendedAction: "Prioritize backroom-to-shelf work for high-impact stores. Approve field action in the System Actions & Human Approvals section.",
       guardrailNote: "Field leadership must approve labor reallocation. No automated store-level action taken.",
       actionLabel: "Go to Inventory & Allocation",
       actionTabId: "inventory",
@@ -268,7 +268,7 @@ const riskRows: MatrixRow[] = [
       ],
       humanApprovalRequired: true,
       businessImpact: "$610K of promo inventory is at risk of missing the selling window entirely if displays are not set and verified before Jun 9.",
-      recommendedAction: "Complete display setup and photo verification for all 53 stores before Jun 9. Approve display-readiness dependency in the AI Actions & Human Approvals section.",
+      recommendedAction: "Complete display setup and photo verification for all 53 stores before Jun 9. Approve display-readiness dependency in the System Actions & Human Approvals section.",
       guardrailNote: "Display execution requires field and merchandising confirmation. No allocation held without explicit approval.",
       actionLabel: "Go to Demand Planning",
       actionTabId: "demand",
@@ -302,7 +302,7 @@ const riskRows: MatrixRow[] = [
       ],
       humanApprovalRequired: true,
       businessImpact: "$780K of inventory may be counted as available in the system but not physically accessible to customers, masking real stockout risk.",
-      recommendedAction: "Approve inventory accuracy verification worklist in the AI Actions & Human Approvals section.",
+      recommendedAction: "Approve inventory accuracy verification worklist in the System Actions & Human Approvals section.",
       guardrailNote: "Inventory accuracy detection is autonomous. Cycle count and adjustment require store ops and inventory control sign-off.",
       actionLabel: "Go to Inventory & Allocation",
       actionTabId: "inventory",
@@ -634,7 +634,7 @@ export default function StoreExecutionPage({ onGoToTab }: StoreExecutionPageProp
           </div>
         </section>
 
-        {/* ── SECTION 5: AI Actions & Human Approvals ── */}
+        {/* ── SECTION 5: System Actions & Human Approvals ── */}
         <section ref={aiSectionRef} className="rounded-2xl border border-border bg-card px-6 py-5">
           <AIActionsModule
             actions={storeActions}

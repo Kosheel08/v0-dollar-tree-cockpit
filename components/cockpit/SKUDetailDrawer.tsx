@@ -10,8 +10,8 @@ const TAB_LABELS: Record<string, string> = {
   "supplier-inbound": "Supplier & Inbound Flow",
   "dc-capacity": "DC Capacity & Transportation",
   "store-execution": "Store Execution",
-  "executive-tower": "Executive Control Tower",
-  "sku-segmentation": "AI-Driven SKU Segmentation",
+  "executive-tower": "Executive Decision Engine",
+  "sku-segmentation": "SKU Strategy Segmentation",
 }
 
 const statusConfig: Record<StatusLevel, { label: string; classes: string }> = {
@@ -182,7 +182,7 @@ export default function SKUDetailDrawer({ open, payload, onClose, onGoToTab }: S
               onClick={() => { onGoToTab("sku-segmentation"); onClose() }}
               className="w-full flex items-center justify-center gap-1.5 border border-primary/30 bg-accent text-primary text-xs font-semibold px-4 py-2 rounded-lg hover:bg-accent/80 transition-colors"
             >
-              <Bot className="w-3.5 h-3.5" /> Open AI-Driven SKU Segmentation
+              <Bot className="w-3.5 h-3.5" /> Open SKU Strategy Segmentation
             </button>
           )}
         </div>

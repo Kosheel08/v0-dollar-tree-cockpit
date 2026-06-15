@@ -13,8 +13,8 @@ import {
 import { cn } from "@/lib/utils"
 
 const navItems = [
-  { label: "Executive Control Tower",   icon: Radio,          id: "executive-tower" },
-  { label: "AI-Driven SKU Segmentation", icon: Cpu,           id: "sku-segmentation" },
+  { label: "Executive Decision Engine",   icon: Radio,          id: "executive-tower" },
+  { label: "SKU Strategy Segmentation",  icon: Cpu,            id: "sku-segmentation" },
   { label: "Demand Planning",           icon: LayoutDashboard, id: "demand" },
   { label: "Inventory & Allocation",    icon: Boxes,           id: "inventory" },
   { label: "Supplier & Inbound Flow",   icon: Truck,           id: "supplier-inbound" },
