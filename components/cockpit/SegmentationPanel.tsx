@@ -4,23 +4,23 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-const categoryChips = ["All", "Household", "Consumables", "Seasonal", "Party", "Health & Beauty"]
+const segmentChips = ["All", "Consistent Replenishment", "Seasonal / Event", "Treasure Hunt / Limited Buy", "Promo / Merchant-Driven", "Constrained / Exception"]
 const regionChips = ["All", "Southeast", "Midwest", "Northeast", "Southwest", "West"]
 
-const planningCutData: Record<string, Record<string, { accuracy: string; bias: string; risk: string; recommendation: string }>> = {
-  "Seasonal · Southeast": {
+const planningCutData: Record<string, { accuracy: string; bias: string; risk: string; recommendation: string }> = {
+  "Seasonal / Event · Southeast": {
     accuracy: "79.8%",
     bias: "-8.7%",
     risk: "$3.1M",
-    recommendation: "Prioritize near-term forecast override review for promoted SKUs and weather-sensitive demand.",
+    recommendation: "Prioritize near-term forecast override review for Seasonal / Event SKUs and weather-sensitive demand.",
   },
-  "Seasonal · Midwest": {
+  "Seasonal / Event · Midwest": {
     accuracy: "80.5%",
     bias: "-7.2%",
     risk: "$2.3M",
-    recommendation: "Review velocity acceleration on core SKUs ahead of next cycle lock.",
+    recommendation: "Review velocity acceleration on Seasonal / Event SKUs ahead of next cycle lock.",
   },
-  "Consumables · Midwest": {
+  "Consistent Replenishment · Midwest": {
     accuracy: "79.1%",
     bias: "-6.7%",
     risk: "$2.6M",
@@ -30,54 +30,54 @@ const planningCutData: Record<string, Record<string, { accuracy: string; bias: s
     accuracy: "86.4%",
     bias: "-4.8%",
     risk: "$12.4M",
-    recommendation: "Monitor exception queue and resolve P1 items before the next forecast lock.",
+    recommendation: "Monitor P1 items and resolve exceptions before the next forecast lock.",
   },
 }
 
-function getPlanningCut(cat: string, reg: string) {
-  const label = `${cat === "All" ? "All Categories" : cat} · ${reg === "All" ? "All Regions" : reg}`
-  const cat2 = cat === "All" ? "All" : cat
+function getPlanningCut(seg: string, reg: string) {
+  const label = `${seg === "All" ? "All Segments" : seg} · ${reg === "All" ? "All Regions" : reg}`
+  const seg2 = seg === "All" ? "All" : seg
   const reg2 = reg === "All" ? "All" : reg
-  const key = `${cat2} · ${reg2}`
+  const key = `${seg2} · ${reg2}`
   return { label, data: planningCutData[key] || planningCutData.default }
 }
 
 interface SegmentationProps {
-  globalCategory: string
+  globalSegment: string
   globalRegion: string
 }
 
-export default function SegmentationPanel({ globalCategory, globalRegion }: SegmentationProps) {
-  const [selectedCategory, setSelectedCategory] = useState("All")
+export default function SegmentationPanel({ globalSegment, globalRegion }: SegmentationProps) {
+  const [selectedSegment, setSelectedSegment] = useState("All")
   const [selectedRegion, setSelectedRegion] = useState("All")
 
-  const { label, data } = getPlanningCut(selectedCategory, selectedRegion)
+  const { label, data } = getPlanningCut(selectedSegment, selectedRegion)
 
   return (
     <section className="flex flex-col gap-4">
       <div>
-        <p className="text-sm font-semibold text-foreground">Category &amp; Region Segmentation</p>
+        <p className="text-sm font-semibold text-foreground">SKU Segment &amp; Region Performance</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Filterable planning cuts used to isolate forecast gaps and concentrated demand risk
+          Filterable planning cuts used to isolate forecast gaps and concentrated demand risk by SKU segment
         </p>
       </div>
 
       {/* Selector card */}
       <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
         <div className="flex flex-col gap-4">
-          {/* Category row */}
+          {/* Segment row */}
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide w-16 shrink-0">
-              Category
+              Segment
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {categoryChips.map((chip) => (
+              {segmentChips.map((chip) => (
                 <button
                   key={chip}
-                  onClick={() => setSelectedCategory(chip)}
+                  onClick={() => setSelectedSegment(chip)}
                   className={cn(
                     "px-3 py-1 rounded-full text-xs font-medium border transition-colors",
-                    selectedCategory === chip
+                    selectedSegment === chip
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground hover:bg-accent"
                   )}

@@ -3,18 +3,18 @@
 import { RefreshCw, Download, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-const categories = ["All Categories", "Household", "Consumables", "Seasonal", "Party", "Health & Beauty"]
+const skuSegments = ["All Segments", "Consistent Replenishment", "Seasonal / Event", "Treasure Hunt / Limited Buy", "Promo / Merchant-Driven", "Constrained / Exception"]
 const regions = ["All Regions", "Southeast", "Midwest", "Northeast", "Southwest", "West"]
 const horizons = ["4 Weeks", "8 Weeks", "13 Weeks", "26 Weeks"]
 const scenarios = ["Baseline", "Promo Adjusted", "Constrained Supply", "Executive Override"]
 
 interface FilterBarProps {
-  category: string
+  segment: string
   region: string
   horizon: string
   scenario: string
   search: string
-  onCategory: (v: string) => void
+  onSegment: (v: string) => void
   onRegion: (v: string) => void
   onHorizon: (v: string) => void
   onScenario: (v: string) => void
@@ -22,12 +22,12 @@ interface FilterBarProps {
 }
 
 export default function FilterBar({
-  category,
+  segment,
   region,
   horizon,
   scenario,
   search,
-  onCategory,
+  onSegment,
   onRegion,
   onHorizon,
   onScenario,
@@ -37,12 +37,12 @@ export default function FilterBar({
     <div className="bg-card border border-border rounded-xl px-4 py-3 flex flex-wrap items-center gap-2.5">
       {/* Dropdowns */}
       <select
-        value={category}
-        onChange={(e) => onCategory(e.target.value)}
+        value={segment}
+        onChange={(e) => onSegment(e.target.value)}
         className="h-8 text-xs bg-background border border-border rounded-md px-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
       >
-        {categories.map((c) => (
-          <option key={c}>{c}</option>
+        {skuSegments.map((s) => (
+          <option key={s}>{s}</option>
         ))}
       </select>
 
@@ -81,7 +81,7 @@ export default function FilterBar({
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
         <input
           type="text"
-          placeholder="Search SKU, category, DC, or region"
+          placeholder="Search SKU, segment, DC, or region"
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           className="h-8 w-full text-xs bg-background border border-border rounded-md pl-8 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"

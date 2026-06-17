@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------
-// Executive Control Tower — static data
+// Executive Decision Engine — static data
 // ---------------------------------------------------------------
 
 export type StatusLevel = "critical" | "watchlist" | "stable" | "recommended" | "high-risk"
@@ -35,7 +35,7 @@ export const riskFlowStages = [
     signal: "-4.8% forecast bias",
     impact: "$12.4M demand-driven revenue at risk",
     explanation:
-      "Demand is being under-forecast in priority categories, creating late-cycle pressure on allocation and fulfillment.",
+      "Demand is being under-forecast across Seasonal / Event and Promo / Merchant-Driven SKU segments, creating late-cycle pressure on allocation and fulfillment.",
   },
   {
     id: "flow-inventory",
@@ -95,8 +95,8 @@ export const sourceSummaryCards = [
     riskMetric: "-4.8% bias",
     businessImpact: "$12.4M revenue at risk",
     explanation:
-      "Forecast accuracy is improving, but under-forecast bias remains concentrated in priority categories, driving late-cycle pressure.",
-    topAction: "Approve targeted forecast uplift for Seasonal demand.",
+      "Forecast accuracy is improving, but under-forecast bias remains concentrated in Seasonal / Event and Promo / Merchant-Driven SKU segments, driving late-cycle pressure.",
+    topAction: "Approve targeted forecast uplift for Seasonal / Event demand.",
   },
   {
     id: "card-inventory",
@@ -122,7 +122,7 @@ export const sourceSummaryCards = [
     businessImpact: "$9.8M inbound value at risk",
     explanation:
       "Late ASNs, short shipments, and lead-time variance are narrowing recovery options before the allocation lock.",
-    topAction: "Expedite critical Seasonal inbound PO and recover Consumables short shipment.",
+    topAction: "Expedite critical Seasonal / Event inbound PO and recover Consistent Replenishment short shipment.",
   },
   {
     id: "card-network",
@@ -156,7 +156,7 @@ export const sourceSummaryCards = [
 export const executiveDecisions = [
   {
     id: "dec-1",
-    title: "Approve Seasonal forecast uplift and protected allocation",
+    title: "Approve Seasonal / Event forecast uplift and protected allocation",
     sourceTabs: ["Demand Planning", "Inventory & Allocation"],
     primarySourceTabId: "inventory",
     valueProtected: "$3.4M",
@@ -165,11 +165,11 @@ export const executiveDecisions = [
     deadline: "Jun 10 · 5:00 PM",
     status: "critical" as StatusLevel,
     rationale:
-      "Under-forecast bias in Seasonal is driving downstream allocation shortfalls. Approving an uplift before the Jun 10 lock allows the allocation engine to position inventory correctly, protecting an estimated $3.4M in seasonal revenue across 72 stores.",
+      "Under-forecast bias in Seasonal / Event SKU segments is driving downstream allocation shortfalls. Approving an uplift before the Jun 10 lock allows the allocation engine to position inventory correctly, protecting an estimated $3.4M in seasonal revenue across 72 stores.",
   },
   {
     id: "dec-2",
-    title: "Expedite delayed Seasonal inbound PO into Savannah DC",
+    title: "Expedite delayed Seasonal / Event inbound PO into Savannah DC",
     sourceTabs: ["Supplier & Inbound Flow", "DC Capacity & Transportation"],
     primarySourceTabId: "supplier-inbound",
     valueProtected: "$1.6M",
@@ -178,7 +178,7 @@ export const executiveDecisions = [
     deadline: "Next 24 hours",
     status: "critical" as StatusLevel,
     rationale:
-      "A delayed Seasonal PO is creating a cascading receipt gap at Savannah DC. Expediting this shipment restores outbound wave sequencing and recovers delivery reliability for 42 downstream stores.",
+      "A delayed Seasonal / Event PO is creating a cascading receipt gap at Savannah DC. Expediting this shipment restores outbound wave sequencing and recovers delivery reliability for 42 downstream stores.",
   },
   {
     id: "dec-3",
@@ -208,7 +208,7 @@ export const executiveDecisions = [
   },
   {
     id: "dec-5",
-    title: "Recover Consumables short shipment for Midwest stores",
+    title: "Recover Consistent Replenishment short shipment for Midwest stores",
     sourceTabs: ["Supplier & Inbound Flow", "Inventory & Allocation"],
     primarySourceTabId: "supplier-inbound",
     valueProtected: "$700K",
@@ -217,7 +217,7 @@ export const executiveDecisions = [
     deadline: "48 hours",
     status: "watchlist" as StatusLevel,
     rationale:
-      "A short shipment in Consumables is creating stockout exposure across 58 Midwest stores. Recovery options include expediting a supplemental shipment or reallocating from an adjacent DC.",
+      "A short shipment in Consistent Replenishment is creating stockout exposure across 58 Midwest stores. Recovery options include expediting a supplemental shipment or reallocating from an adjacent DC.",
   },
 ]
 

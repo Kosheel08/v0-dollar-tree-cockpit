@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 
 const actions = [
   {
-    title: "Approve forecast uplift for Seasonal Southeast",
+    title: "Approve forecast uplift for Seasonal / Event Southeast",
     value: "$2.4M protected revenue",
     effort: "Medium",
     owner: "Demand Planning",
@@ -12,7 +12,7 @@ const actions = [
     effortColor: "text-amber-700 bg-amber-50 border-amber-200",
   },
   {
-    title: "Escalate Midwest consumables constraint",
+    title: "Escalate Midwest Consistent Replenishment constraint",
     value: "$1.7M protected revenue",
     effort: "Low",
     owner: "Supply Planning",
@@ -22,7 +22,7 @@ const actions = [
     effortColor: "text-emerald-700 bg-emerald-50 border-emerald-200",
   },
   {
-    title: "Validate Party promotion calendar",
+    title: "Validate Promo / Merchant-Driven promotion calendar",
     value: "$860K protected revenue",
     effort: "Low",
     owner: "Merchandising",
